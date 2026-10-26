@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grocery Journey Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+:root {
+  --font-anthropic-sans: 'Public Sans', system-ui, sans-serif;
+  --font-anthropic-serif: 'Source Serif 4', Georgia, serif;
+  --color-bg: #f3f4ef; --color-panel: #fcfcfb; --color-fg: #1b2420; --color-fg-muted: #5c6661;
+  --color-border-line: #dfe2db; --color-bad: #c2501f;
+  --cds-border: #d3d7cf; --cds-surface-popover: #ffffff; --cds-text-secondary: #5c6661;
+  --cds-shadow-popover: 0 4px 16px rgba(0,0,0,.12);
+  --cds-chart-muted: #b9bfb8; --cds-chart-grid: #e6e8e2; --cds-chart-reference: #8a928d;
+  --cds-chart-status-critical: #c0392b;
+  --cds-gap-xs: 6px; --cds-gap-sm: 10px; --cds-gap-md: 16px; --cds-gap-lg: 24px;
+  --cds-pad-xs: 4px; --cds-pad-sm: 8px; --cds-pad-md: 12px; --cds-pad-lg: 20px;
+  --cds-radius: 10px; --cds-dur-slow: .3s;
+  --cds-font-size-caption: 13px; --cds-font-size-body: 15px; --cds-font-size-heading: 16px; --cds-font-size-title: 30px;
+  --cds-font-weight-medium: 600;
+  --c1: #2a78d6; --c2: #eb6834;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #111413; --color-panel: #171a19; --color-fg: #eef0ec; --color-fg-muted: #a3aba6;
+    --color-border-line: #2c312f; --color-bad: #e2703f;
+    --cds-border: #353b38; --cds-surface-popover: #202423; --cds-text-secondary: #a3aba6;
+    --cds-shadow-popover: 0 4px 16px rgba(0,0,0,.5);
+    --cds-chart-muted: #4d5551; --cds-chart-grid: #262b29; --cds-chart-reference: #7d8681;
+    --cds-chart-status-critical: #f0705e;
+    --c1: #3d86e0; --c2: #d6622f;
+  }
+}
+:root[data-theme="dark"] {
+  --color-bg: #111413; --color-panel: #171a19; --color-fg: #eef0ec; --color-fg-muted: #a3aba6;
+  --color-border-line: #2c312f; --color-bad: #e2703f;
+  --cds-border: #353b38; --cds-surface-popover: #202423; --cds-text-secondary: #a3aba6;
+  --cds-shadow-popover: 0 4px 16px rgba(0,0,0,.5);
+  --cds-chart-muted: #4d5551; --cds-chart-grid: #262b29; --cds-chart-reference: #7d8681;
+  --cds-chart-status-critical: #f0705e;
+  --c1: #3d86e0; --c2: #d6622f;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--color-bg); color: var(--color-fg); }
+.page { max-width: 1180px; margin: 0 auto; padding: 32px 16px 48px; }
+.foot { margin-top: 32px; font: 13px/1.5 var(--font-anthropic-sans); color: var(--color-fg-muted); }
+.foot a { color: inherit; }
+</style>
+</head>
+<body>
+<div class="page">
+<style>
+.gj { font-family: var(--font-anthropic-sans); color: var(--color-fg); display: flex; flex-direction: column; gap: var(--cds-gap-lg); }
+.gj-head { display: flex; flex-direction: column; gap: var(--cds-gap-xs); }
+.gj-title { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; }
+.gj-lede { color: var(--color-fg-muted); font-size: var(--cds-font-size-body); margin: 0; max-width: 70ch; line-height: 1.5; }
+.gj-lede b { color: var(--color-fg); font-weight: 600; }
+.gj-tabs { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs); border-bottom: 1px solid var(--color-border-line); }
+.gj-tab { appearance: none; background: none; border: 0; border-bottom: 2px solid transparent; padding: var(--cds-pad-sm) var(--cds-pad-md); font: inherit; font-size: var(--cds-font-size-body); color: var(--color-fg-muted); cursor: pointer; margin-bottom: -1px; }
+.gj-tab:hover { color: var(--color-fg); }
+.gj-tab[aria-selected="true"] { color: var(--color-fg); border-bottom-color: var(--color-fg); font-weight: 600; }
+.gj-tab:focus-visible, .gj-chip:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+.gj-page { display: flex; flex-direction: column; gap: var(--cds-gap-md); }
+.gj-page[hidden] { display: none; }
+.gj-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: var(--cds-gap-md); }
+.gj-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); gap: var(--cds-gap-md); }
+.gj-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: flex; flex-direction: column; gap: var(--cds-gap-sm); min-width: 0; }
+.gj-card h3 { margin: 0; font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); }
+.gj-note { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); line-height: 1.45; }
+.gj-tile { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-md) var(--cds-pad-lg); display: flex; flex-direction: column; gap: var(--cds-gap-xs); }
+.gj-tile-label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.gj-big { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); font-variant-numeric: tabular-nums; line-height: 1.1; min-height: 1.1em; }
+.gj-tile-sub { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.gj-section { margin: var(--cds-gap-sm) 0 0; font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); }
+.gj-chips { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs); }
+.gj-chip { appearance: none; font: inherit; font-size: var(--cds-font-size-caption); padding: var(--cds-pad-xs) var(--cds-pad-sm); border-radius: 999px; border: 1px solid var(--color-border-line); background: var(--color-bg); color: var(--color-fg); cursor: pointer; }
+.gj-chip[aria-pressed="true"] { background: var(--color-fg); color: var(--color-bg); border-color: var(--color-fg); }
+.gj-chart { position: relative; width: 100%; min-height: 260px; }
+.gj-chart svg { display: block; overflow: visible; }
+.gj-tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); white-space: nowrap; z-index: 2; }
+.gj-tip .k { color: var(--cds-text-secondary); }
+.gj-tablewrap { overflow-x: auto; }
+.gj-table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+.gj-table th { text-align: left; font-weight: 600; color: var(--color-fg-muted); padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); }
+.gj-table td { padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); }
+.gj-table .num { text-align: right; }
+.gj-table tr.grp td { font-weight: 600; color: var(--color-fg-muted); padding-top: var(--cds-pad-sm); }
+.gj-bar { display: flex; align-items: center; gap: var(--cds-gap-xs); justify-content: flex-end; }
+.gj-bar i { display: inline-block; height: 8px; border-radius: 4px; background: var(--cds-chart-muted); }
+.gj-banner { border: 1px dashed var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-sm) var(--cds-pad-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.gj-banner b { color: var(--color-fg); }
+.gj-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.gj-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.gj-legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.gj-list { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: var(--cds-gap-xs); font-size: var(--cds-font-size-body); line-height: 1.45; }
+[data-dash-source-state=empty] { color: transparent; }
+[data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+.gj-fail { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 120px; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.gj-fail::before { content: ""; width: .375rem; height: .375rem; border-radius: 50%; background: var(--color-bad); }
+</style>
+
+<div class="gj" id="gj">
+  <header class="gj-head">
+    <h1 class="gj-title" id="title">Grocery Journey Dashboard</h1>
+    <p class="gj-lede" id="lede">App speed is the top complaint (<b data-source="pain_points" data-field="share_of_negative" data-where="retailer=All three&amp;stage=App performance (crashes, speed)" data-fmt="pct0">—</b> of negative reviews), only <b data-source="funnel_steps" data-field="step_conversion_closed" data-where="step=add_to_cart" data-fmt="pct0">—</b> of product views reach the cart, and Champions bring <b data-source="rfm_segments" data-field="share_spend" data-where="segment=Champions" data-fmt="pct0">—</b> of spend. Fixing checkout payment is the first test to run.</p>
+  </header>
+
+  <nav class="gj-tabs" role="tablist" aria-label="Dashboard sections">
+    <button class="gj-tab" role="tab" id="tab-overview" data-tab="overview" aria-selected="true">Overview</button>
+    <button class="gj-tab" role="tab" id="tab-complaints" data-tab="complaints" aria-selected="false">Complaints</button>
+    <button class="gj-tab" role="tab" id="tab-funnel" data-tab="funnel" aria-selected="false">Funnel</button>
+    <button class="gj-tab" role="tab" id="tab-customers" data-tab="customers" aria-selected="false">Customers</button>
+    <button class="gj-tab" role="tab" id="tab-test" data-tab="test" aria-selected="false">A/B test</button>
+  </nav>
+
+  <!-- OVERVIEW -->
+  <section class="gj-page" id="overview" data-page="overview">
+    <div class="gj-tiles">
+      <div class="gj-tile"><span class="gj-tile-label">Reviews analysed</span><span class="gj-big" data-source="reviews_summary" data-field="reviews" data-where="retailer=All three" data-fmt="int">—</span><span class="gj-tile-sub">3 Irish grocery apps</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Top complaint: app speed</span><span class="gj-big" data-source="pain_points" data-field="share_of_negative" data-where="retailer=All three&amp;stage=App performance (crashes, speed)" data-fmt="pct1">—</span><span class="gj-tile-sub">of negative reviews</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Session conversion</span><span class="gj-big" data-source="ga4_baselines" data-field="value" data-where="metric=overall_conversion" data-fmt="pct2">—</span><span class="gj-tile-sub">GA4 web sessions</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Cart abandonment</span><span class="gj-big" data-source="ga4_baselines" data-field="value" data-where="metric=cart_abandonment" data-fmt="pct1">—</span><span class="gj-tile-sub">carts with no purchase</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Champions’ share of spend</span><span class="gj-big" data-source="rfm_segments" data-field="share_spend" data-where="segment=Champions" data-fmt="pct0">—</span><span class="gj-tile-sub"><span data-source="rfm_segments" data-field="share_households" data-where="segment=Champions" data-fmt="pct0">—</span> of households</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">A/B test size</span><span class="gj-big" data-source="ab_design" data-field="value" data-where="metric=n_per_group" data-fmt="int">—</span><span class="gj-tile-sub">users per group (designed)</span></div>
+    </div>
+    <div class="gj-grid">
+      <div class="gj-card">
+        <h3>The story in four steps</h3>
+        <ol class="gj-list">
+          <li><b>Complaints:</b> what app users say is broken.</li>
+          <li><b>Funnel:</b> where web shoppers drop off.</li>
+          <li><b>Customers:</b> who drives spend, and whether campaigns and coupons work.</li>
+          <li><b>A/B test:</b> how we would test the top fixable problem.</li>
+        </ol>
+      </div>
+      <div class="gj-card">
+        <h3>Where the data comes from</h3>
+        <ul class="gj-list">
+          <li><b>App reviews:</b> Google Play and App Store, Irish stores, Oct 2024 to Oct 2026. Self-selected, skew negative.</li>
+          <li><b>Web funnel:</b> GA4 public sample, Google Merchandise Store. Real e-commerce, not grocery.</li>
+          <li><b>Customers:</b> The Complete Journey (84.51° release), an anonymised US grocer in 2017.</li>
+          <li>None of it is Tesco data.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPLAINTS -->
+  <section class="gj-page" id="complaints" data-page="complaints" hidden>
+    <div class="gj-chips" role="group" aria-label="Retailer" id="retailer-chips">
+      <button class="gj-chip" id="chip-all" data-r="All three" aria-pressed="true">All three</button>
+      <button class="gj-chip" id="chip-tesco" data-r="Tesco" aria-pressed="false">Tesco Ireland</button>
+      <button class="gj-chip" id="chip-dunnes" data-r="Dunnes Stores" aria-pressed="false">Dunnes Stores</button>
+      <button class="gj-chip" id="chip-supervalu" data-r="SuperValu" aria-pressed="false">SuperValu</button>
+    </div>
+    <div class="gj-grid">
+      <div class="gj-card" style="grid-column: 1 / -1;">
+        <h3 id="pain-title">Share of negative reviews that mention each stage</h3>
+        <p class="gj-note">Negative = 1 or 2 stars. Lines show the 95% interval. One review can mention several stages.</p>
+        <div class="gj-chart" id="pain-chart" data-source="pain_points"></div>
+      </div>
+      <div class="gj-card">
+        <h3>Ratings by stage</h3>
+        <p class="gj-note">Average stars of all reviews that mention the stage. Lower means more painful.</p>
+        <div class="gj-tablewrap">
+          <table class="gj-table" id="pain-table" data-source="pain_points" data-row-key="retailer,stage">
+            <thead><tr><th data-field="stage">Stage</th><th class="num" data-field="share_of_negative">Share of negative</th><th class="num" data-field="avg_rating_when_mentioned">Avg stars</th><th class="num" data-field="negative_mentioning">Negative reviews</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="gj-card">
+        <h3>Reviews per retailer</h3>
+        <p class="gj-note">SuperValu has the fewest reviews but the highest share of negative ones.</p>
+        <div class="gj-tablewrap">
+          <table class="gj-table" id="rev-table" data-source="reviews_summary" data-row-key="retailer">
+            <thead><tr><th data-field="retailer">Retailer</th><th class="num" data-field="reviews">Reviews</th><th class="num" data-field="avg_rating">Avg stars</th><th class="num" data-field="negative_share">Negative</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <h3 style="margin-top: var(--cds-gap-sm);">How accurate is the tagging?</h3>
+        <p class="gj-note">Checked on 100 hand-labelled negative reviews that were not used to write the rules.</p>
+        <div class="gj-tiles">
+          <div class="gj-tile"><span class="gj-tile-label">Precision</span><span class="gj-big" data-source="tag_validation_test" data-field="precision" data-where="stage=ALL STAGES (micro average)" data-fmt="num2">—</span></div>
+          <div class="gj-tile"><span class="gj-tile-label">Recall</span><span class="gj-big" data-source="tag_validation_test" data-field="recall" data-where="stage=ALL STAGES (micro average)" data-fmt="num2">—</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FUNNEL -->
+  <section class="gj-page" id="funnel" data-page="funnel" hidden>
+    <div class="gj-tiles">
+      <div class="gj-tile"><span class="gj-tile-label">Session conversion</span><span class="gj-big" data-source="ga4_baselines" data-field="value" data-where="metric=overall_conversion" data-fmt="pct2">—</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Cart abandonment</span><span class="gj-big" data-source="ga4_baselines" data-field="value" data-where="metric=cart_abandonment" data-fmt="pct1">—</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Checkout abandonment</span><span class="gj-big" data-source="ga4_baselines" data-field="value" data-where="metric=checkout_abandonment" data-fmt="pct1">—</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Payment → purchase</span><span class="gj-big" data-source="ga4_baselines" data-field="value" data-where="metric=payment_to_purchase" data-fmt="pct1">—</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Average order value</span><span class="gj-big" data-source="ga4_baselines" data-field="value" data-where="metric=aov_usd" data-fmt="usd2">—</span></div>
+    </div>
+    <div class="gj-grid">
+      <div class="gj-card" style="grid-column: 1 / -1;">
+        <h3>Purchase funnel</h3>
+        <p class="gj-note" id="funnel-note">Closed funnel: a session counts at a step only if it also did every earlier step in the same visit. The biggest drop is in red.</p>
+        <div class="gj-chips" role="group" aria-label="Funnel type">
+          <button class="gj-chip" id="fun-closed" data-f="closed" aria-pressed="true">Closed funnel</button>
+          <button class="gj-chip" id="fun-open" data-f="open" aria-pressed="false">Open funnel</button>
+        </div>
+        <div class="gj-chart" id="funnel-chart" data-source="funnel_steps" style="min-height: 240px;"></div>
+      </div>
+      <div class="gj-card" style="grid-column: 1 / -1;">
+        <h3>Conversion by segment</h3>
+        <p class="gj-note">Device makes almost no difference. New users convert far less, and stall between checkout and payment.</p>
+        <div class="gj-tablewrap">
+          <table class="gj-table" id="seg-table" data-source="funnel_segments" data-row-key="segment">
+            <thead><tr><th data-field="segment">Segment</th><th data-field="segment_type">Group</th><th class="num" data-field="sessions">Sessions</th><th class="num" data-field="conversion_rate">Conversion</th><th class="num" data-field="cart_abandonment">Cart abandonment</th><th class="num" data-field="checkout_to_payment">Checkout → payment</th><th class="num" data-field="aov_usd">AOV</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <p class="gj-banner"><b>Data:</b> GA4 public sample (Google Merchandise Store), Nov 2020 to Jan 2021. Real e-commerce web data, not grocery.</p>
+  </section>
+
+  <!-- CUSTOMERS -->
+  <section class="gj-page" id="customers" data-page="customers" hidden>
+    <div class="gj-tiles">
+      <div class="gj-tile"><span class="gj-tile-label">Households</span><span class="gj-big" data-source="cj_kpis" data-field="value" data-where="kpi=households" data-fmt="int">—</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Average basket</span><span class="gj-big" data-source="cj_kpis" data-field="value" data-where="kpi=aov_usd_mean" data-fmt="usd2">—</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Items per basket</span><span class="gj-big" data-source="cj_kpis" data-field="value" data-where="kpi=items_per_basket_mean" data-fmt="num1">—</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Days between trips (median)</span><span class="gj-big" data-source="cj_kpis" data-field="value" data-where="kpi=inter_purchase_days_median" data-fmt="int">—</span></div>
+    </div>
+    <div class="gj-grid">
+      <div class="gj-card" style="grid-column: 1 / -1;">
+        <h3>RFM segments: share of households vs share of spend</h3>
+        <p class="gj-note">Recency, frequency and spend scored 1–5. Champions and Loyal households carry most of the spend.</p>
+        <div class="gj-legend" id="rfm-legend" data-source="rfm_segments"></div>
+        <div class="gj-chart" id="rfm-chart" data-source="rfm_segments" style="min-height: 300px;"></div>
+      </div>
+      <div class="gj-card">
+        <h3>Did campaigns lift weekly spend?</h3>
+        <p class="gj-note">Difference-in-differences, USD per household per week, with 95% intervals. Every interval crosses zero, so no clear lift.</p>
+        <div class="gj-chart" id="did-chart" data-source="campaign_did" style="min-height: 280px;"></div>
+      </div>
+      <div class="gj-card">
+        <h3>Are coupon users less loyal?</h3>
+        <p class="gj-note">Coupon use Jan–Jun, loyalty Jul–Dec. Coupon users lapse less than non-users.</p>
+        <div class="gj-tablewrap">
+          <table class="gj-table" id="coupon-table" data-source="coupon_groups" data-row-key="group">
+            <thead><tr><th data-field="group">Coupon use</th><th class="num" data-field="households">Households</th><th class="num" data-field="h2_active_week_share_mean">Active weeks</th><th class="num" data-field="lapsed_rate">Lapsed</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <p class="gj-banner"><b>Data:</b> The Complete Journey (84.51° release), anonymised US grocer, 2017. Not Tesco data. Campaigns were not randomised.</p>
+  </section>
+
+  <!-- A/B TEST -->
+  <section class="gj-page" id="test" data-page="test" hidden>
+    <p class="gj-banner"><b>Designed, not run.</b> The baseline comes from the real GA4 funnel. Nothing on this tab is a test result.</p>
+    <div class="gj-tiles">
+      <div class="gj-tile"><span class="gj-tile-label">Baseline: payment → purchase</span><span class="gj-big" data-source="ab_design" data-field="value" data-where="metric=baseline_user_payment_to_purchase" data-fmt="pct1">—</span><span class="gj-tile-sub">users who reach payment</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Smallest lift to detect</span><span class="gj-big"><span data-source="ab_design" data-field="value" data-where="metric=mde_abs_points" data-fmt="pts">—</span></span><span class="gj-tile-sub">percentage points</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Users per group</span><span class="gj-big" data-source="ab_design" data-field="value" data-where="metric=n_per_group" data-fmt="int">—</span><span class="gj-tile-sub">power <span data-source="ab_design" data-field="value" data-where="metric=power" data-fmt="pct0">—</span>, alpha <span data-source="ab_design" data-field="value" data-where="metric=alpha" data-fmt="num2">—</span></span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Weeks at GA4 traffic</span><span class="gj-big" data-source="ab_design" data-field="value" data-where="metric=weeks_at_ga4_traffic" data-fmt="int">—</span><span class="gj-tile-sub">fewer at a bigger retailer</span></div>
+    </div>
+    <div class="gj-grid">
+      <div class="gj-card">
+        <h3>Test plan: one-tap wallet payment</h3>
+        <ul class="gj-list">
+          <li><b>Change:</b> add Apple Pay / Google Pay to the payment page.</li>
+          <li><b>Why:</b> payment complaints in reviews, and a real drop at the payment step.</li>
+          <li><b>Unit:</b> user, 50/50, analysed once they reach the payment page.</li>
+          <li><b>Guardrails:</b> order value, overall conversion, payment errors, page speed.</li>
+          <li><b>Rules:</b> check the split first, no peeking, ship only if the main metric is up and no guardrail is harmed.</li>
+        </ul>
+      </div>
+      <div class="gj-card">
+        <h3>Sample size for different effects</h3>
+        <p class="gj-note">Smaller effects need far more users. Measuring every visitor, not just those at payment, would need far more.</p>
+        <div class="gj-tablewrap">
+          <table class="gj-table" id="power-table" data-source="ab_power" data-row-key="scenario">
+            <thead><tr><th data-field="scenario">Effect</th><th class="num" data-field="target">Target rate</th><th class="num" data-field="n_per_group">Users per group</th><th class="num" data-field="weeks_needed">Weeks</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+
+<p class="foot">Every number comes from the CSV files in <a href="https://github.com/Newnew-niu/online-grocery-customer-journey/tree/main/reports/dashboard_data">reports/dashboard_data</a>, made by the project scripts. Built with <code>src/41_build_static_dashboard.py</code>.</p>
+</div>
+<script>
+// Small stand-in for the hosted dashboard API: the data is inlined at build time.
+(function () {
+  const DATA = {"ab_design": [{"metric": "baseline_user_payment_to_purchase", "value": "0.7682"}, {"metric": "baseline_session_payment_to_purchase", "value": "0.7109"}, {"metric": "baseline_overall_session_conversion", "value": "0.0135"}, {"metric": "users_reaching_payment_per_week", "value": "437.6"}, {"metric": "alpha", "value": "0.05"}, {"metric": "power", "value": "0.8"}, {"metric": "mde_abs_points", "value": "3.0"}, {"metric": "mde_relative", "value": "0.0391"}, {"metric": "n_per_group", "value": "2959.0"}, {"metric": "n_total", "value": "5918.0"}, {"metric": "weeks_at_ga4_traffic", "value": "14.0"}, {"metric": "planned_weeks", "value": "14.0"}], "ab_power": [{"scenario": "+2 pts", "metric": "payment -> purchase (triggered users)", "baseline": "0.7682", "mde_abs_points": "2.0", "mde_relative": "0.026", "target": "0.7882", "n_per_group": "6771", "n_total": "13542", "weeks_needed": "31"}, {"scenario": "+3 pts", "metric": "payment -> purchase (triggered users)", "baseline": "0.7682", "mde_abs_points": "3.0", "mde_relative": "0.0391", "target": "0.7982", "n_per_group": "2959", "n_total": "5918", "weeks_needed": "14"}, {"scenario": "+4 pts", "metric": "payment -> purchase (triggered users)", "baseline": "0.7682", "mde_abs_points": "4.0", "mde_relative": "0.0521", "target": "0.8082", "n_per_group": "1635", "n_total": "3270", "weeks_needed": "8"}, {"scenario": "+5 pts", "metric": "payment -> purchase (triggered users)", "baseline": "0.7682", "mde_abs_points": "5.0", "mde_relative": "0.0651", "target": "0.8182", "n_per_group": "1027", "n_total": "2054", "weeks_needed": "5"}, {"scenario": "All users (diluted)", "metric": "purchase, ALL users (not triggered) - same +3pt gain diluted", "baseline": "0.0164", "mde_abs_points": "0.0639", "mde_relative": "0.039", "target": "0.017", "n_per_group": "631097", "n_total": "1262194", "weeks_needed": "62"}], "campaign_did": [{"campaign": "8", "outcome": "total_spend", "type": "Type A", "start": "2017-05-08", "end": "2017-06-25", "control_group": "not_this_campaign", "treated_hh": "1076", "control_hh": "1391", "post_weeks": "8", "treated_pre_mean": "50.68", "treated_post_mean": "51.16", "control_pre_mean": "16.72", "control_post_mean": "18.59", "did_usd_per_hh_week": "-1.4", "se": "0.92", "ci_low": "-3.19", "ci_high": "0.4", "p_value": "0.1266", "uplift_pct_of_treated_pre": "-0.028", "pretrend_wald_p": "0.3088", "label": "Campaign 8 · total spend"}, {"campaign": "8", "outcome": "total_spend", "type": "Type A", "start": "2017-05-08", "end": "2017-06-25", "control_group": "never_targeted", "treated_hh": "1076", "control_hh": "908", "post_weeks": "8", "treated_pre_mean": "50.68", "treated_post_mean": "51.16", "control_pre_mean": "8.52", "control_post_mean": "9.3", "did_usd_per_hh_week": "-0.31", "se": "0.87", "ci_low": "-2.02", "ci_high": "1.41", "p_value": "0.7263", "uplift_pct_of_treated_pre": "-0.006", "pretrend_wald_p": "0.4301", "label": "Campaign 8 · total spend"}, {"campaign": "8", "outcome": "coupon_product_spend", "type": "Type A", "start": "2017-05-08", "end": "2017-06-25", "control_group": "not_this_campaign", "treated_hh": "1076", "control_hh": "1391", "post_weeks": "8", "treated_pre_mean": "18.69", "treated_post_mean": "19.14", "control_pre_mean": "6.23", "control_post_mean": "7.09", "did_usd_per_hh_week": "-0.41", "se": "0.39", "ci_low": "-1.18", "ci_high": "0.35", "p_value": "0.2889", "uplift_pct_of_treated_pre": "-0.022", "pretrend_wald_p": "0.651", "label": "Campaign 8 · coupon-product spend"}, {"campaign": "8", "outcome": "coupon_product_spend", "type": "Type A", "start": "2017-05-08", "end": "2017-06-25", "control_group": "never_targeted", "treated_hh": "1076", "control_hh": "908", "post_weeks": "8", "treated_pre_mean": "18.69", "treated_post_mean": "19.14", "control_pre_mean": "3.25", "control_post_mean": "3.52", "did_usd_per_hh_week": "0.17", "se": "0.38", "ci_low": "-0.57", "ci_high": "0.91", "p_value": "0.6531", "uplift_pct_of_treated_pre": "0.009", "pretrend_wald_p": "0.6401", "label": "Campaign 8 · coupon-product spend"}, {"campaign": "13", "outcome": "total_spend", "type": "Type A", "start": "2017-08-08", "end": "2017-09-24", "control_group": "not_this_campaign", "treated_hh": "1077", "control_hh": "1390", "post_weeks": "7", "treated_pre_mean": "51.52", "treated_post_mean": "50.72", "control_pre_mean": "16.96", "control_post_mean": "16.34", "did_usd_per_hh_week": "-0.18", "se": "0.92", "ci_low": "-1.98", "ci_high": "1.62", "p_value": "0.8459", "uplift_pct_of_treated_pre": "-0.003", "pretrend_wald_p": "0.0527", "label": "Campaign 13 · total spend"}, {"campaign": "13", "outcome": "total_spend", "type": "Type A", "start": "2017-08-08", "end": "2017-09-24", "control_group": "never_targeted", "treated_hh": "1077", "control_hh": "908", "post_weeks": "7", "treated_pre_mean": "51.52", "treated_post_mean": "50.72", "control_pre_mean": "10.34", "control_post_mean": "10.86", "did_usd_per_hh_week": "-1.32", "se": "0.93", "ci_low": "-3.13", "ci_high": "0.5", "p_value": "0.1561", "uplift_pct_of_treated_pre": "-0.026", "pretrend_wald_p": "0.0028", "label": "Campaign 13 · total spend"}, {"campaign": "13", "outcome": "coupon_product_spend", "type": "Type A", "start": "2017-08-08", "end": "2017-09-24", "control_group": "not_this_campaign", "treated_hh": "1077", "control_hh": "1390", "post_weeks": "7", "treated_pre_mean": "27.31", "treated_post_mean": "26.64", "control_pre_mean": "9.31", "control_post_mean": "8.88", "did_usd_per_hh_week": "-0.23", "se": "0.52", "ci_low": "-1.25", "ci_high": "0.79", "p_value": "0.6606", "uplift_pct_of_treated_pre": "-0.008", "pretrend_wald_p": "0.1591", "label": "Campaign 13 · coupon-product spend"}, {"campaign": "13", "outcome": "coupon_product_spend", "type": "Type A", "start": "2017-08-08", "end": "2017-09-24", "control_group": "never_targeted", "treated_hh": "1077", "control_hh": "908", "post_weeks": "7", "treated_pre_mean": "27.31", "treated_post_mean": "26.64", "control_pre_mean": "5.51", "control_post_mean": "5.77", "did_usd_per_hh_week": "-0.93", "se": "0.52", "ci_low": "-1.95", "ci_high": "0.1", "p_value": "0.076", "uplift_pct_of_treated_pre": "-0.034", "pretrend_wald_p": "0.0055", "label": "Campaign 13 · coupon-product spend"}, {"campaign": "18", "outcome": "total_spend", "type": "Type A", "start": "2017-10-30", "end": "2017-12-24", "control_group": "not_this_campaign", "treated_hh": "1133", "control_hh": "1334", "post_weeks": "9", "treated_pre_mean": "49.86", "treated_post_mean": "53.17", "control_pre_mean": "16.46", "control_post_mean": "18.82", "did_usd_per_hh_week": "0.95", "se": "0.88", "ci_low": "-0.78", "ci_high": "2.69", "p_value": "0.2804", "uplift_pct_of_treated_pre": "0.019", "pretrend_wald_p": "0.9035", "label": "Campaign 18 · total spend"}, {"campaign": "18", "outcome": "total_spend", "type": "Type A", "start": "2017-10-30", "end": "2017-12-24", "control_group": "never_targeted", "treated_hh": "1133", "control_hh": "908", "post_weeks": "9", "treated_pre_mean": "49.86", "treated_post_mean": "53.17", "control_pre_mean": "12.0", "control_post_mean": "14.07", "did_usd_per_hh_week": "1.23", "se": "0.88", "ci_low": "-0.49", "ci_high": "2.95", "p_value": "0.1606", "uplift_pct_of_treated_pre": "0.025", "pretrend_wald_p": "0.902", "label": "Campaign 18 · total spend"}, {"campaign": "18", "outcome": "coupon_product_spend", "type": "Type A", "start": "2017-10-30", "end": "2017-12-24", "control_group": "not_this_campaign", "treated_hh": "1133", "control_hh": "1334", "post_weeks": "9", "treated_pre_mean": "25.99", "treated_post_mean": "26.75", "control_pre_mean": "8.77", "control_post_mean": "9.68", "did_usd_per_hh_week": "-0.14", "se": "0.49", "ci_low": "-1.1", "ci_high": "0.82", "p_value": "0.7736", "uplift_pct_of_treated_pre": "-0.005", "pretrend_wald_p": "0.6242", "label": "Campaign 18 · coupon-product spend"}, {"campaign": "18", "outcome": "coupon_product_spend", "type": "Type A", "start": "2017-10-30", "end": "2017-12-24", "control_group": "never_targeted", "treated_hh": "1133", "control_hh": "908", "post_weeks": "9", "treated_pre_mean": "25.99", "treated_post_mean": "26.75", "control_pre_mean": "6.35", "control_post_mean": "7.22", "did_usd_per_hh_week": "-0.1", "se": "0.49", "ci_low": "-1.06", "ci_high": "0.85", "p_value": "0.8314", "uplift_pct_of_treated_pre": "-0.004", "pretrend_wald_p": "0.4542", "label": "Campaign 18 · coupon-product spend"}], "cj_kpis": [{"kpi": "households", "value": "2467.0"}, {"kpi": "baskets", "value": "141029.0"}, {"kpi": "total_spend_usd", "value": "4185791.0"}, {"kpi": "aov_usd_mean", "value": "29.68"}, {"kpi": "aov_usd_median", "value": "16.0"}, {"kpi": "items_per_basket_mean", "value": "13.46"}, {"kpi": "items_per_basket_median", "value": "7.0"}, {"kpi": "baskets_per_household_mean", "value": "57.2"}, {"kpi": "baskets_per_household_median", "value": "40.0"}, {"kpi": "spend_per_household_mean_usd", "value": "1697.0"}, {"kpi": "inter_purchase_days_median", "value": "4.0"}, {"kpi": "inter_purchase_days_mean", "value": "6.7"}, {"kpi": "share_baskets_with_coupon", "value": "0.0575"}, {"kpi": "share_households_ever_coupon", "value": "0.59"}, {"kpi": "share_households_lapsed_before_nov", "value": "0.091"}], "coupon_groups": [{"group": "No coupons", "households": "1312", "h1_coupon_share_mean": "0.0", "h1_baskets_median": "12.5", "h1_spend_median": "301.305", "h2_baskets_median": "14.0", "h2_active_week_share_mean": "0.431", "lapsed_rate": "0.09", "h2_to_h1_baskets_ratio_median": "1.064"}, {"group": "Light", "households": "550", "h1_coupon_share_mean": "0.042", "h1_baskets_median": "39.0", "h1_spend_median": "1190.585", "h2_baskets_median": "37.0", "h2_active_week_share_mean": "0.719", "lapsed_rate": "0.013", "h2_to_h1_baskets_ratio_median": "0.967"}, {"group": "Medium", "households": "257", "h1_coupon_share_mean": "0.113", "h1_baskets_median": "24.0", "h1_spend_median": "830.77", "h2_baskets_median": "26.0", "h2_active_week_share_mean": "0.608", "lapsed_rate": "0.016", "h2_to_h1_baskets_ratio_median": "1.038"}, {"group": "Heavy", "households": "269", "h1_coupon_share_mean": "0.297", "h1_baskets_median": "22.0", "h1_spend_median": "886.41", "h2_baskets_median": "22.0", "h2_active_week_share_mean": "0.577", "lapsed_rate": "0.022", "h2_to_h1_baskets_ratio_median": "1.081"}], "funnel_segments": [{"segment_type": "Device", "segment": "desktop", "sessions": "208942", "share_of_sessions": "0.5802", "view_rate": "0.2145", "view_to_cart": "0.1959", "cart_to_checkout": "0.3901", "checkout_to_payment": "0.6412", "payment_to_purchase_closed": "0.7313", "payment_to_purchase_open": "0.7073", "conversion_rate": "0.0132", "conversion_ci_low": "0.0127", "conversion_ci_high": "0.0137", "cart_abandonment": "0.8173", "aov_usd": "69.5818"}, {"segment_type": "Device", "segment": "mobile", "sessions": "143185", "share_of_sessions": "0.3976", "view_rate": "0.213", "view_to_cart": "0.1991", "cart_to_checkout": "0.3959", "checkout_to_payment": "0.6547", "payment_to_purchase_closed": "0.7497", "payment_to_purchase_open": "0.7174", "conversion_rate": "0.0139", "conversion_ci_low": "0.0133", "conversion_ci_high": "0.0146", "cart_abandonment": "0.8058", "aov_usd": "68.2007"}, {"segment_type": "Device", "segment": "tablet", "sessions": "8002", "share_of_sessions": "0.0222", "view_rate": "0.2124", "view_to_cart": "0.1888", "cart_to_checkout": "0.405", "checkout_to_payment": "0.6769", "payment_to_purchase_closed": "0.7045", "payment_to_purchase_open": "0.6842", "conversion_rate": "0.013", "conversion_ci_low": "0.0107", "conversion_ci_high": "0.0157", "cart_abandonment": "0.8069", "aov_usd": "67.1633"}, {"segment_type": "First-touch medium", "segment": "Other / hidden", "sessions": "74687", "share_of_sessions": "0.2074", "view_rate": "0.2188", "view_to_cart": "0.2112", "cart_to_checkout": "0.4085", "checkout_to_payment": "0.673", "payment_to_purchase_closed": "0.7366", "payment_to_purchase_open": "0.7159", "conversion_rate": "0.0162", "conversion_ci_low": "0.0154", "conversion_ci_high": "0.0172", "cart_abandonment": "0.7976", "aov_usd": "64.0798"}, {"segment_type": "First-touch medium", "segment": "cpc", "sessions": "15618", "share_of_sessions": "0.0434", "view_rate": "0.2028", "view_to_cart": "0.1783", "cart_to_checkout": "0.3681", "checkout_to_payment": "0.5865", "payment_to_purchase_closed": "0.7541", "payment_to_purchase_open": "0.7083", "conversion_rate": "0.0098", "conversion_ci_low": "0.0084", "conversion_ci_high": "0.0115", "cart_abandonment": "0.8372", "aov_usd": "58.0513"}, {"segment_type": "First-touch medium", "segment": "direct (none)", "sessions": "83459", "share_of_sessions": "0.2317", "view_rate": "0.2118", "view_to_cart": "0.1984", "cart_to_checkout": "0.3952", "checkout_to_payment": "0.6291", "payment_to_purchase_closed": "0.7374", "payment_to_purchase_open": "0.7187", "conversion_rate": "0.0129", "conversion_ci_low": "0.0122", "conversion_ci_high": "0.0137", "cart_abandonment": "0.8169", "aov_usd": "69.9298"}, {"segment_type": "First-touch medium", "segment": "organic", "sessions": "122841", "share_of_sessions": "0.3411", "view_rate": "0.2095", "view_to_cart": "0.1839", "cart_to_checkout": "0.3778", "checkout_to_payment": "0.6169", "payment_to_purchase_closed": "0.7253", "payment_to_purchase_open": "0.6949", "conversion_rate": "0.011", "conversion_ci_low": "0.0104", "conversion_ci_high": "0.0116", "cart_abandonment": "0.831", "aov_usd": "71.4825"}, {"segment_type": "First-touch medium", "segment": "referral", "sessions": "63524", "share_of_sessions": "0.1764", "view_rate": "0.2218", "view_to_cart": "0.207", "cart_to_checkout": "0.4002", "checkout_to_payment": "0.6958", "payment_to_purchase_closed": "0.7562", "payment_to_purchase_open": "0.7189", "conversion_rate": "0.0166", "conversion_ci_low": "0.0157", "conversion_ci_high": "0.0176", "cart_abandonment": "0.7899", "aov_usd": "72.0009"}, {"segment_type": "New vs returning", "segment": "New", "sessions": "261238", "share_of_sessions": "0.7254", "view_rate": "0.1997", "view_to_cart": "0.1696", "cart_to_checkout": "0.3598", "checkout_to_payment": "0.4844", "payment_to_purchase_closed": "0.7224", "payment_to_purchase_open": "0.6784", "conversion_rate": "0.0068", "conversion_ci_low": "0.0065", "conversion_ci_high": "0.0071", "cart_abandonment": "0.8742", "aov_usd": "64.4769"}, {"segment_type": "New vs returning", "segment": "Returning", "sessions": "98891", "share_of_sessions": "0.2746", "view_rate": "0.2513", "view_to_cart": "0.2546", "cart_to_checkout": "0.4388", "checkout_to_payment": "0.8343", "payment_to_purchase_closed": "0.7487", "payment_to_purchase_open": "0.7313", "conversion_rate": "0.031", "conversion_ci_low": "0.03", "conversion_ci_high": "0.0321", "cart_abandonment": "0.7263", "aov_usd": "71.4914"}], "funnel_steps": [{"step_order": "1", "step": "view_item", "step_label": "View item", "sessions_closed": "77020", "share_of_all_sessions_closed": "0.2139", "step_conversion_closed": "0.2139", "sessions_open": "77020", "share_of_all_sessions_open": "0.2139", "step_conversion_open": "0.2139"}, {"step_order": "2", "step": "add_to_cart", "step_label": "Add to cart", "sessions_closed": "15173", "share_of_all_sessions_closed": "0.0421", "step_conversion_closed": "0.197", "sessions_open": "15188", "share_of_all_sessions_open": "0.0422", "step_conversion_open": "0.1972"}, {"step_order": "3", "step": "begin_checkout", "step_label": "Begin checkout", "sessions_closed": "5959", "share_of_all_sessions_closed": "0.0165", "step_conversion_closed": "0.3927", "sessions_open": "11106", "share_of_all_sessions_open": "0.0308", "step_conversion_open": "0.7312"}, {"step_order": "4", "step": "add_payment_info", "step_label": "Add payment info", "sessions_closed": "3858", "share_of_all_sessions_closed": "0.0107", "step_conversion_closed": "0.6474", "sessions_open": "6815", "share_of_all_sessions_open": "0.0189", "step_conversion_open": "0.6136"}, {"step_order": "5", "step": "purchase", "step_label": "Purchase", "sessions_closed": "2848", "share_of_all_sessions_closed": "0.0079", "step_conversion_closed": "0.7382", "sessions_open": "4848", "share_of_all_sessions_open": "0.0135", "step_conversion_open": "0.7114"}], "ga4_baselines": [{"metric": "sessions", "value": "360129.0"}, {"metric": "users", "value": "270154.0"}, {"metric": "purchasing_sessions", "value": "4848.0"}, {"metric": "overall_conversion", "value": "0.013461842839649126"}, {"metric": "cart_abandonment", "value": "0.8124835396365552"}, {"metric": "checkout_abandonment", "value": "0.5637493246893571"}, {"metric": "payment_to_purchase", "value": "0.7109317681584739"}, {"metric": "sessions_with_payment_info", "value": "6815.0"}, {"metric": "sessions_with_payment_info_per_week", "value": "520.2290076335878"}, {"metric": "sessions_per_week", "value": "27490.763358778626"}, {"metric": "aov_usd", "value": "68.97067225290421"}, {"metric": "purchases_with_zero_revenue_removed", "value": "402.0"}, {"metric": "purchases_without_add_to_cart_in_session", "value": "2000.0"}], "pain_points": [{"retailer": "All three", "stage": "App performance (crashes, speed)", "negative_reviews": "609", "negative_mentioning": "207", "share_of_negative": "0.34", "ci_low": "0.303", "ci_high": "0.378", "avg_rating_when_mentioned": "1.79", "reviews_mentioning_any_rating": "273", "rank_in_retailer": "1"}, {"retailer": "All three", "stage": "Pricing, promotions & loyalty", "negative_reviews": "609", "negative_mentioning": "195", "share_of_negative": "0.32", "ci_low": "0.284", "ci_high": "0.358", "avg_rating_when_mentioned": "3.0", "reviews_mentioning_any_rating": "430", "rank_in_retailer": "2"}, {"retailer": "All three", "stage": "Account & login", "negative_reviews": "609", "negative_mentioning": "107", "share_of_negative": "0.176", "ci_low": "0.148", "ci_high": "0.208", "avg_rating_when_mentioned": "1.65", "reviews_mentioning_any_rating": "129", "rank_in_retailer": "3"}, {"retailer": "All three", "stage": "Checkout & payment", "negative_reviews": "609", "negative_mentioning": "68", "share_of_negative": "0.112", "ci_low": "0.089", "ci_high": "0.139", "avg_rating_when_mentioned": "2.02", "reviews_mentioning_any_rating": "98", "rank_in_retailer": "4"}, {"retailer": "All three", "stage": "Search & browse", "negative_reviews": "609", "negative_mentioning": "62", "share_of_negative": "0.102", "ci_low": "0.08", "ci_high": "0.128", "avg_rating_when_mentioned": "3.25", "reviews_mentioning_any_rating": "162", "rank_in_retailer": "5"}, {"retailer": "All three", "stage": "Refunds & customer service", "negative_reviews": "609", "negative_mentioning": "42", "share_of_negative": "0.069", "ci_low": "0.051", "ci_high": "0.092", "avg_rating_when_mentioned": "2.64", "reviews_mentioning_any_rating": "76", "rank_in_retailer": "6"}, {"retailer": "All three", "stage": "Substitutions & missing items", "negative_reviews": "609", "negative_mentioning": "30", "share_of_negative": "0.049", "ci_low": "0.035", "ci_high": "0.069", "avg_rating_when_mentioned": "3.04", "reviews_mentioning_any_rating": "77", "rank_in_retailer": "7"}, {"retailer": "All three", "stage": "Delivery / collection", "negative_reviews": "609", "negative_mentioning": "21", "share_of_negative": "0.034", "ci_low": "0.023", "ci_high": "0.052", "avg_rating_when_mentioned": "4.25", "reviews_mentioning_any_rating": "161", "rank_in_retailer": "8"}, {"retailer": "All three", "stage": "Delivery slot booking", "negative_reviews": "609", "negative_mentioning": "8", "share_of_negative": "0.013", "ci_low": "0.007", "ci_high": "0.026", "avg_rating_when_mentioned": "3.18", "reviews_mentioning_any_rating": "22", "rank_in_retailer": "9"}, {"retailer": "All three", "stage": "Basket / add to cart", "negative_reviews": "609", "negative_mentioning": "6", "share_of_negative": "0.01", "ci_low": "0.005", "ci_high": "0.021", "avg_rating_when_mentioned": "3.0", "reviews_mentioning_any_rating": "13", "rank_in_retailer": "10"}, {"retailer": "Dunnes Stores", "stage": "Pricing, promotions & loyalty", "negative_reviews": "212", "negative_mentioning": "108", "share_of_negative": "0.509", "ci_low": "0.443", "ci_high": "0.576", "avg_rating_when_mentioned": "3.16", "reviews_mentioning_any_rating": "262", "rank_in_retailer": "1"}, {"retailer": "Dunnes Stores", "stage": "Account & login", "negative_reviews": "212", "negative_mentioning": "31", "share_of_negative": "0.146", "ci_low": "0.105", "ci_high": "0.2", "avg_rating_when_mentioned": "1.95", "reviews_mentioning_any_rating": "42", "rank_in_retailer": "2"}, {"retailer": "Dunnes Stores", "stage": "App performance (crashes, speed)", "negative_reviews": "212", "negative_mentioning": "25", "share_of_negative": "0.118", "ci_low": "0.081", "ci_high": "0.168", "avg_rating_when_mentioned": "2.34", "reviews_mentioning_any_rating": "44", "rank_in_retailer": "3"}, {"retailer": "Dunnes Stores", "stage": "Refunds & customer service", "negative_reviews": "212", "negative_mentioning": "17", "share_of_negative": "0.08", "ci_low": "0.051", "ci_high": "0.125", "avg_rating_when_mentioned": "2.69", "reviews_mentioning_any_rating": "32", "rank_in_retailer": "4"}, {"retailer": "Dunnes Stores", "stage": "Search & browse", "negative_reviews": "212", "negative_mentioning": "11", "share_of_negative": "0.052", "ci_low": "0.029", "ci_high": "0.091", "avg_rating_when_mentioned": "3.58", "reviews_mentioning_any_rating": "40", "rank_in_retailer": "5"}, {"retailer": "Dunnes Stores", "stage": "Substitutions & missing items", "negative_reviews": "212", "negative_mentioning": "7", "share_of_negative": "0.033", "ci_low": "0.016", "ci_high": "0.067", "avg_rating_when_mentioned": "3.05", "reviews_mentioning_any_rating": "21", "rank_in_retailer": "6"}, {"retailer": "Dunnes Stores", "stage": "Checkout & payment", "negative_reviews": "212", "negative_mentioning": "6", "share_of_negative": "0.028", "ci_low": "0.013", "ci_high": "0.06", "avg_rating_when_mentioned": "2.0", "reviews_mentioning_any_rating": "9", "rank_in_retailer": "7"}, {"retailer": "Dunnes Stores", "stage": "Delivery / collection", "negative_reviews": "212", "negative_mentioning": "6", "share_of_negative": "0.028", "ci_low": "0.013", "ci_high": "0.06", "avg_rating_when_mentioned": "3.62", "reviews_mentioning_any_rating": "21", "rank_in_retailer": "7"}, {"retailer": "Dunnes Stores", "stage": "Basket / add to cart", "negative_reviews": "212", "negative_mentioning": "2", "share_of_negative": "0.009", "ci_low": "0.003", "ci_high": "0.034", "avg_rating_when_mentioned": "1.0", "reviews_mentioning_any_rating": "2", "rank_in_retailer": "9"}, {"retailer": "Dunnes Stores", "stage": "Delivery slot booking", "negative_reviews": "212", "negative_mentioning": "1", "share_of_negative": "0.005", "ci_low": "0.001", "ci_high": "0.026", "avg_rating_when_mentioned": "3.33", "reviews_mentioning_any_rating": "3", "rank_in_retailer": "10"}, {"retailer": "SuperValu", "stage": "App performance (crashes, speed)", "negative_reviews": "143", "negative_mentioning": "93", "share_of_negative": "0.65", "ci_low": "0.569", "ci_high": "0.724", "avg_rating_when_mentioned": "1.63", "reviews_mentioning_any_rating": "115", "rank_in_retailer": "1"}, {"retailer": "SuperValu", "stage": "Search & browse", "negative_reviews": "143", "negative_mentioning": "29", "share_of_negative": "0.203", "ci_low": "0.145", "ci_high": "0.276", "avg_rating_when_mentioned": "2.21", "reviews_mentioning_any_rating": "42", "rank_in_retailer": "2"}, {"retailer": "SuperValu", "stage": "Checkout & payment", "negative_reviews": "143", "negative_mentioning": "28", "share_of_negative": "0.196", "ci_low": "0.139", "ci_high": "0.268", "avg_rating_when_mentioned": "1.81", "reviews_mentioning_any_rating": "37", "rank_in_retailer": "3"}, {"retailer": "SuperValu", "stage": "Account & login", "negative_reviews": "143", "negative_mentioning": "10", "share_of_negative": "0.07", "ci_low": "0.038", "ci_high": "0.124", "avg_rating_when_mentioned": "1.36", "reviews_mentioning_any_rating": "11", "rank_in_retailer": "4"}, {"retailer": "SuperValu", "stage": "Pricing, promotions & loyalty", "negative_reviews": "143", "negative_mentioning": "10", "share_of_negative": "0.07", "ci_low": "0.038", "ci_high": "0.124", "avg_rating_when_mentioned": "2.74", "reviews_mentioning_any_rating": "19", "rank_in_retailer": "4"}, {"retailer": "SuperValu", "stage": "Refunds & customer service", "negative_reviews": "143", "negative_mentioning": "6", "share_of_negative": "0.042", "ci_low": "0.019", "ci_high": "0.089", "avg_rating_when_mentioned": "2.11", "reviews_mentioning_any_rating": "9", "rank_in_retailer": "6"}, {"retailer": "SuperValu", "stage": "Substitutions & missing items", "negative_reviews": "143", "negative_mentioning": "4", "share_of_negative": "0.028", "ci_low": "0.011", "ci_high": "0.07", "avg_rating_when_mentioned": "2.43", "reviews_mentioning_any_rating": "7", "rank_in_retailer": "7"}, {"retailer": "SuperValu", "stage": "Delivery slot booking", "negative_reviews": "143", "negative_mentioning": "2", "share_of_negative": "0.014", "ci_low": "0.004", "ci_high": "0.05", "avg_rating_when_mentioned": "2.0", "reviews_mentioning_any_rating": "3", "rank_in_retailer": "8"}, {"retailer": "SuperValu", "stage": "Delivery / collection", "negative_reviews": "143", "negative_mentioning": "2", "share_of_negative": "0.014", "ci_low": "0.004", "ci_high": "0.05", "avg_rating_when_mentioned": "4.43", "reviews_mentioning_any_rating": "23", "rank_in_retailer": "8"}, {"retailer": "SuperValu", "stage": "Basket / add to cart", "negative_reviews": "143", "negative_mentioning": "1", "share_of_negative": "0.007", "ci_low": "0.001", "ci_high": "0.039", "avg_rating_when_mentioned": "3.0", "reviews_mentioning_any_rating": "2", "rank_in_retailer": "10"}, {"retailer": "Tesco", "stage": "App performance (crashes, speed)", "negative_reviews": "254", "negative_mentioning": "89", "share_of_negative": "0.35", "ci_low": "0.294", "ci_high": "0.411", "avg_rating_when_mentioned": "1.75", "reviews_mentioning_any_rating": "114", "rank_in_retailer": "1"}, {"retailer": "Tesco", "stage": "Pricing, promotions & loyalty", "negative_reviews": "254", "negative_mentioning": "77", "share_of_negative": "0.303", "ci_low": "0.25", "ci_high": "0.362", "avg_rating_when_mentioned": "2.76", "reviews_mentioning_any_rating": "149", "rank_in_retailer": "2"}, {"retailer": "Tesco", "stage": "Account & login", "negative_reviews": "254", "negative_mentioning": "66", "share_of_negative": "0.26", "ci_low": "0.21", "ci_high": "0.317", "avg_rating_when_mentioned": "1.53", "reviews_mentioning_any_rating": "76", "rank_in_retailer": "3"}, {"retailer": "Tesco", "stage": "Checkout & payment", "negative_reviews": "254", "negative_mentioning": "34", "share_of_negative": "0.134", "ci_low": "0.097", "ci_high": "0.181", "avg_rating_when_mentioned": "2.17", "reviews_mentioning_any_rating": "52", "rank_in_retailer": "4"}, {"retailer": "Tesco", "stage": "Search & browse", "negative_reviews": "254", "negative_mentioning": "22", "share_of_negative": "0.087", "ci_low": "0.058", "ci_high": "0.128", "avg_rating_when_mentioned": "3.64", "reviews_mentioning_any_rating": "80", "rank_in_retailer": "5"}, {"retailer": "Tesco", "stage": "Substitutions & missing items", "negative_reviews": "254", "negative_mentioning": "19", "share_of_negative": "0.075", "ci_low": "0.048", "ci_high": "0.114", "avg_rating_when_mentioned": "3.12", "reviews_mentioning_any_rating": "49", "rank_in_retailer": "6"}, {"retailer": "Tesco", "stage": "Refunds & customer service", "negative_reviews": "254", "negative_mentioning": "19", "share_of_negative": "0.075", "ci_low": "0.048", "ci_high": "0.114", "avg_rating_when_mentioned": "2.74", "reviews_mentioning_any_rating": "35", "rank_in_retailer": "6"}, {"retailer": "Tesco", "stage": "Delivery / collection", "negative_reviews": "254", "negative_mentioning": "13", "share_of_negative": "0.051", "ci_low": "0.03", "ci_high": "0.086", "avg_rating_when_mentioned": "4.32", "reviews_mentioning_any_rating": "117", "rank_in_retailer": "8"}, {"retailer": "Tesco", "stage": "Delivery slot booking", "negative_reviews": "254", "negative_mentioning": "5", "share_of_negative": "0.02", "ci_low": "0.008", "ci_high": "0.045", "avg_rating_when_mentioned": "3.38", "reviews_mentioning_any_rating": "16", "rank_in_retailer": "9"}, {"retailer": "Tesco", "stage": "Basket / add to cart", "negative_reviews": "254", "negative_mentioning": "3", "share_of_negative": "0.012", "ci_low": "0.004", "ci_high": "0.034", "avg_rating_when_mentioned": "3.44", "reviews_mentioning_any_rating": "9", "rank_in_retailer": "10"}], "reviews_summary": [{"retailer": "Dunnes Stores", "reviews": "892.0", "avg_rating": "3.8744", "negative": "212.0", "negative_share": "0.2377"}, {"retailer": "SuperValu", "reviews": "266.0", "avg_rating": "2.6992", "negative": "143.0", "negative_share": "0.5376"}, {"retailer": "Tesco", "reviews": "933.0", "avg_rating": "3.7417", "negative": "254.0", "negative_share": "0.2722"}, {"retailer": "All three", "reviews": "2091.0", "avg_rating": "3.6657", "negative": "609.0", "negative_share": "0.2912"}], "rfm_segments": [{"segment": "Champions", "households": "520", "recency_days_median": "2.0", "baskets_median": "97.0", "spend_median_usd": "3130.115", "aov_mean_usd": "34.381", "coupon_basket_share_mean": "0.077", "with_demographics": "346", "share_households": "0.211", "share_spend": "0.46", "top_age_band": "45-54", "share_with_kids": "0.355", "share_income_50k_plus": "0.555"}, {"segment": "Loyal", "households": "467", "recency_days_median": "8.0", "baskets_median": "73.0", "spend_median_usd": "1703.82", "aov_mean_usd": "27.34", "coupon_basket_share_mean": "0.05", "with_demographics": "253", "share_households": "0.189", "share_spend": "0.249", "top_age_band": "45-54", "share_with_kids": "0.32", "share_income_50k_plus": "0.443"}, {"segment": "Big spenders", "households": "209", "recency_days_median": "8.0", "baskets_median": "41.0", "spend_median_usd": "2155.17", "aov_mean_usd": "66.509", "coupon_basket_share_mean": "0.105", "with_demographics": "119", "share_households": "0.085", "share_spend": "0.122", "top_age_band": "45-54", "share_with_kids": "0.429", "share_income_50k_plus": "0.605"}, {"segment": "Promising", "households": "262", "recency_days_median": "2.0", "baskets_median": "28.0", "spend_median_usd": "704.09", "aov_mean_usd": "27.378", "coupon_basket_share_mean": "0.043", "with_demographics": "32", "share_households": "0.106", "share_spend": "0.046", "top_age_band": "25-34", "share_with_kids": "0.438", "share_income_50k_plus": "0.438"}, {"segment": "Needs attention", "households": "238", "recency_days_median": "8.0", "baskets_median": "25.0", "spend_median_usd": "568.09", "aov_mean_usd": "26.572", "coupon_basket_share_mean": "0.036", "with_demographics": "18", "share_households": "0.096", "share_spend": "0.036", "top_age_band": "45-54", "share_with_kids": "0.278", "share_income_50k_plus": "0.5"}, {"segment": "At risk", "households": "126", "recency_days_median": "21.0", "baskets_median": "39.0", "spend_median_usd": "948.585", "aov_mean_usd": "23.445", "coupon_basket_share_mean": "0.048", "with_demographics": "24", "share_households": "0.051", "share_spend": "0.027", "top_age_band": "45-54", "share_with_kids": "0.417", "share_income_50k_plus": "0.458"}, {"segment": "Lapsed / low", "households": "645", "recency_days_median": "39.0", "baskets_median": "12.0", "spend_median_usd": "279.26", "aov_mean_usd": "29.678", "coupon_basket_share_mean": "0.038", "with_demographics": "9", "share_households": "0.261", "share_spend": "0.059", "top_age_band": "25-34", "share_with_kids": "0.444", "share_income_50k_plus": "0.778"}], "tag_validation_test": [{"stage": "Account & login", "hand_labelled": "23", "rule_tagged": "21", "correct": "17", "precision": "0.81", "recall": "0.74"}, {"stage": "Search & browse", "hand_labelled": "8", "rule_tagged": "7", "correct": "5", "precision": "0.71", "recall": "0.62"}, {"stage": "Basket / add to cart", "hand_labelled": "2", "rule_tagged": "0", "correct": "0", "precision": "", "recall": "0.0"}, {"stage": "Delivery slot booking", "hand_labelled": "2", "rule_tagged": "2", "correct": "2", "precision": "1.0", "recall": "1.0"}, {"stage": "Checkout & payment", "hand_labelled": "15", "rule_tagged": "11", "correct": "11", "precision": "1.0", "recall": "0.73"}, {"stage": "Substitutions & missing items", "hand_labelled": "6", "rule_tagged": "3", "correct": "3", "precision": "1.0", "recall": "0.5"}, {"stage": "Delivery / collection", "hand_labelled": "5", "rule_tagged": "5", "correct": "1", "precision": "0.2", "recall": "0.2"}, {"stage": "Refunds & customer service", "hand_labelled": "9", "rule_tagged": "6", "correct": "5", "precision": "0.83", "recall": "0.56"}, {"stage": "App performance (crashes, speed)", "hand_labelled": "32", "rule_tagged": "29", "correct": "25", "precision": "0.86", "recall": "0.78"}, {"stage": "Pricing, promotions & loyalty", "hand_labelled": "32", "rule_tagged": "31", "correct": "30", "precision": "0.97", "recall": "0.94"}, {"stage": "ALL STAGES (micro average)", "hand_labelled": "134", "rule_tagged": "115", "correct": "99", "precision": "0.86", "recall": "0.74"}]};
+  const listeners = [];
+  const readColors = () => { const s = getComputedStyle(document.documentElement); return [s.getPropertyValue('--c1').trim(), s.getPropertyValue('--c2').trim()]; };
+  const fire = () => { window.dash.colors = readColors(); listeners.forEach((fn) => fn()); };
+  window.dash = {
+    colors: [],
+    data: (id) => (DATA[id] ? { status: 'ok', data: DATA[id] } : { status: 'error' }),
+    onData: (fn) => { listeners.push(fn); fire(); },
+    setLink: (name) => { history.replaceState(null, '', '#' + name); }
+  };
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', fire);
+  let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(fire, 150); });
+})();
+</script>
+<script>
+(function () {
+  const root = document.getElementById('gj');
+  const FMT = {
+    int: d3.format(','), pct0: d3.format('.0%'), pct1: d3.format('.1%'), pct2: d3.format('.2%'),
+    num1: d3.format('.1f'), num2: d3.format('.2f'), usd2: (v) => '$' + d3.format(',.2f')(v),
+    pts: (v) => '+' + d3.format('.0f')(v)
+  };
+  const state = { retailer: 'All three', funnel: 'closed', tab: 'overview' };
+
+  const rowsOf = (id) => { const d = dash.data(id); return d.status === 'ok' ? d.data : null; };
+  const statusOf = (id) => dash.data(id).status;
+  const parseWhere = (s) => s.split('&').map((p) => { const i = p.indexOf('='); return [decodeURIComponent(p.slice(0, i)), decodeURIComponent(p.slice(i + 1))]; });
+  const findRow = (rows, where) => rows.find((r) => where.every(([k, v]) => String(r[k]) === v));
+  const num = (x) => Number(x);
+  const css = (name) => `var(${name})`;
+
+  // ---- tabs ----
+  function showTab(name) {
+    state.tab = name;
+    root.querySelectorAll('.gj-tab').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
+    root.querySelectorAll('.gj-page').forEach((p) => { p.hidden = p.dataset.page !== name; });
+    dash.setLink(name);
+    draw();
+  }
+  root.querySelectorAll('.gj-tab').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
+  root.querySelectorAll('#retailer-chips .gj-chip').forEach((b) => b.addEventListener('click', () => {
+    state.retailer = b.dataset.r;
+    root.querySelectorAll('#retailer-chips .gj-chip').forEach((c) => c.setAttribute('aria-pressed', String(c === b)));
+    draw();
+  }));
+  root.querySelectorAll('[data-f]').forEach((b) => b.addEventListener('click', () => {
+    state.funnel = b.dataset.f;
+    root.querySelectorAll('[data-f]').forEach((c) => c.setAttribute('aria-pressed', String(c === b)));
+    draw();
+  }));
+
+  // ---- single values ----
+  function fillMarks() {
+    root.querySelectorAll('[data-fmt]').forEach((el) => {
+      const id = el.dataset.source;
+      const rows = rowsOf(id);
+      if (!rows) { el.textContent = '—'; el.classList.toggle('dash-skeleton', statusOf(id) === 'loading'); return; }
+      el.classList.remove('dash-skeleton');
+      const r = findRow(rows, parseWhere(el.dataset.where));
+      const v = r ? num(r[el.dataset.field]) : NaN;
+      el.textContent = Number.isFinite(v) ? FMT[el.dataset.fmt](v) : '—';
+    });
+  }
+
+  // ---- helpers ----
+  function failBox(box, id) {
+    box.innerHTML = '';
+    const s = statusOf(id);
+    if (s === 'loading') { box.classList.add('dash-skeleton'); return true; }
+    box.classList.remove('dash-skeleton');
+    if (s !== 'ok') { const d = document.createElement('div'); d.className = 'gj-fail'; d.textContent = 'Failed to load'; box.appendChild(d); return true; }
+    return false;
+  }
+  function textWidth(svg, strings, size) {
+    const t = svg.append('text').attr('font-size', size).style('font-family', 'var(--font-anthropic-sans)');
+    let w = 0;
+    strings.forEach((s) => { t.text(s); w = Math.max(w, t.node().getComputedTextLength()); });
+    t.remove();
+    return w;
+  }
+  function tooltip(box) {
+    const tip = document.createElement('div');
+    tip.className = 'gj-tip'; tip.hidden = true; box.appendChild(tip);
+    return {
+      show(ev, lines) {
+        tip.replaceChildren();
+        lines.forEach(([k, v], i) => { const div = document.createElement('div'); if (i === 0) { div.className = 'k'; div.textContent = k; } else { div.textContent = k + ': ' + v; } tip.appendChild(div); });
+        tip.hidden = false;
+        const b = box.getBoundingClientRect();
+        let x = ev.clientX - b.left + 12, y = ev.clientY - b.top + 12;
+        const w = tip.offsetWidth;
+        if (x + w > b.width) x = Math.max(0, ev.clientX - b.left - w - 12);
+        tip.style.left = x + 'px'; tip.style.top = y + 'px';
+      },
+      hide() { tip.hidden = true; }
+    };
+  }
+  function fillTable(id, sel, rows, cells, keyFn, groupBy) {
+    const tbody = root.querySelector(sel + ' tbody');
+    tbody.replaceChildren();
+    if (!rows) return;
+    let last = null;
+    rows.forEach((r) => {
+      if (groupBy && r[groupBy] !== last) {
+        last = r[groupBy];
+        const g = document.createElement('tr'); g.className = 'grp';
+        const td = document.createElement('td'); td.colSpan = cells.length; td.textContent = last;
+        g.appendChild(td); tbody.appendChild(g);
+      }
+      const tr = document.createElement('tr');
+      if (keyFn) tr.dataset.key = keyFn(r);
+      cells.forEach((c) => {
+        const td = document.createElement('td');
+        if (c.num) td.className = 'num';
+        if (c.bar) {
+          const wrap = document.createElement('span'); wrap.className = 'gj-bar';
+          const i = document.createElement('i'); i.style.width = Math.round(c.bar(r) * 60) + 'px';
+          if (c.barColor) i.style.background = c.barColor;
+          const t = document.createElement('span'); t.textContent = c.f(r);
+          wrap.append(i, t); td.appendChild(wrap);
+        } else { td.textContent = c.f(r); }
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ---- complaints ----
+  function drawPain() {
+    const box = root.querySelector('#pain-chart');
+    if (failBox(box, 'pain_points')) return;
+    const rows = rowsOf('pain_points').filter((r) => r.retailer === state.retailer)
+      .map((r) => ({ stage: r.stage, v: num(r.share_of_negative), lo: num(r.ci_low), hi: num(r.ci_high), n: num(r.negative_mentioning), N: num(r.negative_reviews) }))
+      .sort((a, b) => b.v - a.v);
+    root.querySelector('#pain-title').textContent = 'Share of negative reviews that mention each stage · ' + (state.retailer === 'Tesco' ? 'Tesco Ireland' : state.retailer);
+    const W = box.clientWidth, rowH = 30, top = 8, bottom = 28;
+    const H = top + rows.length * rowH + bottom;
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('height', H);
+    const fs = 12;
+    const labW = Math.min(W * 0.45, textWidth(svg, rows.map((d) => d.stage), fs) + 12);
+    const endW = textWidth(svg, ['00%'], fs) + 10;
+    const x = d3.scaleLinear([0, Math.max(0.1, d3.max(rows, (d) => d.hi))], [labW, W - endW]).nice();
+    const y = d3.scaleBand(rows.map((d) => d.stage), [top, top + rows.length * rowH]).padding(0.3);
+    const ticks = x.ticks(Math.max(2, Math.floor((W - labW) / 90)));
+    svg.append('g').selectAll('line').data(ticks).join('line').attr('x1', x).attr('x2', x).attr('y1', top).attr('y2', H - bottom).style('stroke', css('--cds-chart-grid'));
+    svg.append('g').selectAll('text').data(ticks).join('text').attr('x', x).attr('y', H - 8).attr('text-anchor', 'middle').attr('font-size', fs).style('fill', css('--color-fg-muted')).text(d3.format('.0%'));
+    const accent = dash.colors[0];
+    const g = svg.append('g').selectAll('g').data(rows).join('g');
+    g.append('text').attr('x', labW - 10).attr('y', (d) => y(d.stage) + y.bandwidth() / 2).attr('dy', '0.35em').attr('text-anchor', 'end').attr('font-size', fs).style('fill', css('--color-fg')).text((d) => d.stage);
+    g.append('rect').attr('x', x(0)).attr('y', (d) => y(d.stage)).attr('height', y.bandwidth()).attr('width', (d) => Math.max(0, x(d.v) - x(0))).attr('rx', 4)
+      .style('fill', (d, i) => (i < 3 ? accent : css('--cds-chart-muted')));
+    g.append('line').attr('x1', (d) => x(d.lo)).attr('x2', (d) => x(d.hi)).attr('y1', (d) => y(d.stage) + y.bandwidth() / 2).attr('y2', (d) => y(d.stage) + y.bandwidth() / 2).style('stroke', css('--color-fg')).attr('stroke-width', 1.5).attr('opacity', 0.55);
+    g.append('text').attr('x', (d) => x(d.hi) + 6).attr('y', (d) => y(d.stage) + y.bandwidth() / 2).attr('dy', '0.35em').attr('font-size', fs).style('fill', css('--color-fg-muted')).text((d) => d3.format('.0%')(d.v));
+    const tip = tooltip(box);
+    g.append('rect').attr('x', 0).attr('width', W).attr('y', (d) => y(d.stage) - 4).attr('height', y.bandwidth() + 8).attr('fill', 'transparent')
+      .on('mousemove', (ev, d) => tip.show(ev, [[d.stage], ['Share', d3.format('.1%')(d.v)], ['95% interval', d3.format('.1%')(d.lo) + ' – ' + d3.format('.1%')(d.hi)], ['Reviews', d3.format(',')(d.n) + ' of ' + d3.format(',')(d.N)]]))
+      .on('mouseleave', () => tip.hide());
+  }
+  function painTables() {
+    const p = rowsOf('pain_points');
+    fillTable('pain_points', '#pain-table', p ? p.filter((r) => r.retailer === state.retailer).sort((a, b) => num(a.avg_rating_when_mentioned) - num(b.avg_rating_when_mentioned)) : null, [
+      { f: (r) => r.stage },
+      { num: 1, f: (r) => d3.format('.1%')(num(r.share_of_negative)) },
+      { num: 1, f: (r) => d3.format('.2f')(num(r.avg_rating_when_mentioned)) },
+      { num: 1, f: (r) => d3.format(',')(num(r.negative_mentioning)) }
+    ], (r) => encodeURIComponent(r.retailer) + ',' + encodeURIComponent(r.stage));
+    const s = rowsOf('reviews_summary');
+    const order = ['Tesco', 'Dunnes Stores', 'SuperValu', 'All three'];
+    fillTable('reviews_summary', '#rev-table', s ? order.map((k) => s.find((r) => r.retailer === k)).filter(Boolean) : null, [
+      { f: (r) => r.retailer },
+      { num: 1, f: (r) => d3.format(',')(num(r.reviews)) },
+      { num: 1, f: (r) => d3.format('.2f')(num(r.avg_rating)) },
+      { num: 1, f: (r) => d3.format('.1%')(num(r.negative_share)) }
+    ]);
+  }
+
+  // ---- funnel ----
+  function drawFunnel() {
+    const box = root.querySelector('#funnel-chart');
+    if (failBox(box, 'funnel_steps')) return;
+    const col = state.funnel === 'closed' ? 'closed' : 'open';
+    root.querySelector('#funnel-note').textContent = col === 'closed'
+      ? 'Closed funnel: a session counts at a step only if it also did every earlier step in the same visit. The biggest drop is in red.'
+      : 'Open funnel: every session with the event, even if an earlier step happened in another visit. The biggest drop is in red.';
+    const rows = rowsOf('funnel_steps').map((r) => ({ label: r.step_label, n: num(r['sessions_' + col]), sc: num(r['step_conversion_' + col]), order: num(r.step_order) })).sort((a, b) => a.order - b.order);
+    const worst = rows.slice(1).reduce((m, d) => (d.sc < m.sc ? d : m), rows[1]);
+    const W = box.clientWidth, rowH = 42, top = 4;
+    const H = top + rows.length * rowH + 4;
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('height', H);
+    const fs = 12;
+    const labW = textWidth(svg, rows.map((d) => d.label), fs) + 14;
+    const endW = textWidth(svg, rows.map((d) => d3.format(',')(d.n) + '   lost 80% from previous step'), fs) + 8;
+    const x = d3.scaleLinear([0, d3.max(rows, (d) => d.n)], [labW, Math.max(labW + 40, W - endW)]);
+    const y = d3.scaleBand(rows.map((d) => d.label), [top, H - 4]).padding(0.28);
+    const g = svg.selectAll('g').data(rows).join('g');
+    g.append('text').attr('x', labW - 10).attr('y', (d) => y(d.label) + y.bandwidth() / 2).attr('dy', '0.35em').attr('text-anchor', 'end').attr('font-size', fs).style('fill', css('--color-fg')).text((d) => d.label);
+    g.append('rect').attr('x', x(0)).attr('y', (d) => y(d.label)).attr('height', y.bandwidth()).attr('width', (d) => Math.max(2, x(d.n) - x(0))).attr('rx', 4).attr('fill', dash.colors[0]);
+    const lab = g.append('text').attr('x', (d) => x(d.n) + 8).attr('y', (d) => y(d.label) + y.bandwidth() / 2).attr('dy', '0.35em').attr('font-size', fs);
+    lab.append('tspan').style('fill', css('--color-fg')).text((d) => d3.format(',')(d.n));
+    lab.append('tspan').attr('dx', 10).style('fill', (d) => (d === worst ? css('--cds-chart-status-critical') : css('--color-fg-muted'))).attr('font-weight', (d) => (d === worst ? 600 : 400))
+      .text((d, i) => (i === 0 ? d3.format('.1%')(d.sc) + ' of all sessions' : 'lost ' + d3.format('.0%')(1 - d.sc) + ' from previous step'));
+  }
+  function segTable() {
+    const s = rowsOf('funnel_segments');
+    const order = ['Device', 'New vs returning', 'First-touch medium'];
+    const sorted = s ? s.slice().sort((a, b) => order.indexOf(a.segment_type) - order.indexOf(b.segment_type) || num(b.sessions) - num(a.sessions)) : null;
+    const maxC = s ? d3.max(s, (r) => num(r.conversion_rate)) : 1;
+    fillTable('funnel_segments', '#seg-table', sorted, [
+      { f: (r) => r.segment },
+      { f: (r) => r.segment_type },
+      { num: 1, f: (r) => d3.format(',')(num(r.sessions)) },
+      { num: 1, bar: (r) => num(r.conversion_rate) / maxC, barColor: dash.colors[0], f: (r) => d3.format('.2%')(num(r.conversion_rate)) },
+      { num: 1, f: (r) => d3.format('.1%')(num(r.cart_abandonment)) },
+      { num: 1, f: (r) => d3.format('.1%')(num(r.checkout_to_payment)) },
+      { num: 1, f: (r) => '$' + d3.format(',.2f')(num(r.aov_usd)) }
+    ]);
+  }
+
+  // ---- customers ----
+  function drawRfm() {
+    const box = root.querySelector('#rfm-chart');
+    const leg = root.querySelector('#rfm-legend');
+    leg.replaceChildren();
+    if (failBox(box, 'rfm_segments')) return;
+    const series = [['share_households', 'Share of households', dash.colors[0]], ['share_spend', 'Share of spend', dash.colors[1]]];
+    series.forEach(([, name, c]) => { const s = document.createElement('span'); const i = document.createElement('i'); i.style.background = c; s.append(i, document.createTextNode(name)); leg.appendChild(s); });
+    const rows = rowsOf('rfm_segments').map((r) => ({ seg: r.segment, n: num(r.households), share_households: num(r.share_households), share_spend: num(r.share_spend) }));
+    const W = box.clientWidth, top = 10, bottom = 8, groupH = 46;
+    const H = top + rows.length * groupH + bottom;
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('height', H);
+    const fs = 12;
+    const labW = textWidth(svg, rows.map((d) => d.seg), fs) + 14;
+    const x = d3.scaleLinear([0, d3.max(rows, (d) => Math.max(d.share_households, d.share_spend))], [labW, W - 44]);
+    const y = d3.scaleBand(rows.map((d) => d.seg), [top, H - bottom]).padding(0.2);
+    const yi = d3.scaleBand(series.map((s) => s[0]), [0, y.bandwidth()]).padding(0.12);
+    const tip = tooltip(box);
+    const g = svg.selectAll('g').data(rows).join('g').attr('transform', (d) => `translate(0,${y(d.seg)})`);
+    g.append('text').attr('x', labW - 10).attr('y', y.bandwidth() / 2).attr('dy', '0.35em').attr('text-anchor', 'end').attr('font-size', fs).style('fill', css('--color-fg')).text((d) => d.seg);
+    series.forEach(([k, , c]) => {
+      g.append('rect').attr('x', x(0)).attr('y', yi(k)).attr('height', yi.bandwidth()).attr('width', (d) => Math.max(0, x(d[k]) - x(0))).attr('rx', 4).attr('fill', c);
+      g.append('text').attr('x', (d) => x(d[k]) + 6).attr('y', yi(k) + yi.bandwidth() / 2).attr('dy', '0.35em').attr('font-size', 11).style('fill', css('--color-fg-muted')).text((d) => d3.format('.0%')(d[k]));
+    });
+    g.append('rect').attr('x', 0).attr('width', W).attr('height', y.bandwidth()).attr('fill', 'transparent')
+      .on('mousemove', (ev, d) => tip.show(ev, [[d.seg], ['Households', d3.format(',')(d.n)], ['Share of households', d3.format('.1%')(d.share_households)], ['Share of spend', d3.format('.1%')(d.share_spend)]]))
+      .on('mouseleave', () => tip.hide());
+  }
+  function drawDid() {
+    const box = root.querySelector('#did-chart');
+    if (failBox(box, 'campaign_did')) return;
+    const rows = rowsOf('campaign_did').filter((r) => r.control_group === 'not_this_campaign')
+      .map((r) => ({ label: r.label, v: num(r.did_usd_per_hh_week), lo: num(r.ci_low), hi: num(r.ci_high), p: num(r.p_value) }));
+    const W = box.clientWidth, top = 6, bottom = 30, rowH = 36;
+    const H = top + rows.length * rowH + bottom;
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('height', H);
+    const fs = 12;
+    const labW = Math.min(W * 0.5, textWidth(svg, rows.map((d) => d.label), fs) + 14);
+    const ext = Math.max(Math.abs(d3.min(rows, (d) => d.lo)), Math.abs(d3.max(rows, (d) => d.hi)));
+    const x = d3.scaleLinear([-ext, ext], [labW + 8, W - 12]).nice();
+    const y = d3.scaleBand(rows.map((d) => d.label), [top, H - bottom]).padding(0.3);
+    const ticks = x.ticks(Math.max(2, Math.floor((W - labW) / 70)));
+    svg.append('g').selectAll('line').data(ticks).join('line').attr('x1', x).attr('x2', x).attr('y1', top).attr('y2', H - bottom).style('stroke', css('--cds-chart-grid'));
+    svg.append('line').attr('x1', x(0)).attr('x2', x(0)).attr('y1', top).attr('y2', H - bottom).style('stroke', css('--cds-chart-reference')).attr('stroke-dasharray', '4 3');
+    svg.append('g').selectAll('text').data(ticks).join('text').attr('x', x).attr('y', H - 10).attr('text-anchor', 'middle').attr('font-size', fs).style('fill', css('--color-fg-muted')).text((d) => (d > 0 ? '+$' : d < 0 ? '−$' : '$') + Math.abs(d));
+    const tip = tooltip(box);
+    const g = svg.selectAll('g.r').data(rows).join('g').attr('class', 'r');
+    const cy = (d) => y(d.label) + y.bandwidth() / 2;
+    g.append('text').attr('x', labW - 6).attr('y', cy).attr('dy', '0.35em').attr('text-anchor', 'end').attr('font-size', fs).style('fill', css('--color-fg')).text((d) => d.label);
+    g.append('line').attr('x1', (d) => x(d.lo)).attr('x2', (d) => x(d.hi)).attr('y1', cy).attr('y2', cy).attr('stroke', dash.colors[0]).attr('stroke-width', 2).attr('stroke-linecap', 'round');
+    g.append('circle').attr('cx', (d) => x(d.v)).attr('cy', cy).attr('r', 5).attr('fill', dash.colors[0]).style('stroke', css('--color-panel')).attr('stroke-width', 2);
+    g.append('rect').attr('x', 0).attr('width', W).attr('y', (d) => y(d.label) - 4).attr('height', y.bandwidth() + 8).attr('fill', 'transparent')
+      .on('mousemove', (ev, d) => tip.show(ev, [[d.label], ['Estimate', (d.v >= 0 ? '+$' : '−$') + d3.format('.2f')(Math.abs(d.v)) + ' per week'], ['95% interval', d3.format('.2f')(d.lo) + ' to ' + d3.format('.2f')(d.hi)], ['p-value', d3.format('.3f')(d.p)]]))
+      .on('mouseleave', () => tip.hide());
+  }
+  function couponTable() {
+    const c = rowsOf('coupon_groups');
+    const order = ['No coupons', 'Light', 'Medium', 'Heavy'];
+    const maxL = c ? d3.max(c, (r) => num(r.lapsed_rate)) : 1;
+    fillTable('coupon_groups', '#coupon-table', c ? order.map((k) => c.find((r) => r.group === k)).filter(Boolean) : null, [
+      { f: (r) => r.group },
+      { num: 1, f: (r) => d3.format(',')(num(r.households)) },
+      { num: 1, f: (r) => d3.format('.1%')(num(r.h2_active_week_share_mean)) },
+      { num: 1, bar: (r) => num(r.lapsed_rate) / maxL, barColor: dash.colors[1], f: (r) => d3.format('.1%')(num(r.lapsed_rate)) }
+    ]);
+  }
+
+  // ---- A/B test ----
+  function powerTable() {
+    const p = rowsOf('ab_power');
+    fillTable('ab_power', '#power-table', p, [
+      { f: (r) => r.scenario },
+      { num: 1, f: (r) => d3.format('.1%')(num(r.target)) },
+      { num: 1, f: (r) => d3.format(',')(num(r.n_per_group)) },
+      { num: 1, f: (r) => d3.format(',')(num(r.weeks_needed)) }
+    ]);
+  }
+
+  function draw() {
+    fillMarks();
+    painTables(); segTable(); couponTable(); powerTable();
+    // charts need a visible box to measure, so only the open tab draws them
+    if (state.tab === 'complaints') drawPain();
+    if (state.tab === 'funnel') drawFunnel();
+    if (state.tab === 'customers') { drawRfm(); drawDid(); }
+  }
+
+  dash.onData(draw);
+
+  const named = document.getElementById(location.hash.slice(1));
+  if (named && named.dataset.page) showTab(named.dataset.page);
+})();
+</script>
+
+</body>
+</html>

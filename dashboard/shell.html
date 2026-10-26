@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grocery Journey Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+:root {
+  --font-anthropic-sans: 'Public Sans', system-ui, sans-serif;
+  --font-anthropic-serif: 'Source Serif 4', Georgia, serif;
+  --color-bg: #f3f4ef; --color-panel: #fcfcfb; --color-fg: #1b2420; --color-fg-muted: #5c6661;
+  --color-border-line: #dfe2db; --color-bad: #c2501f;
+  --cds-border: #d3d7cf; --cds-surface-popover: #ffffff; --cds-text-secondary: #5c6661;
+  --cds-shadow-popover: 0 4px 16px rgba(0,0,0,.12);
+  --cds-chart-muted: #b9bfb8; --cds-chart-grid: #e6e8e2; --cds-chart-reference: #8a928d;
+  --cds-chart-status-critical: #c0392b;
+  --cds-gap-xs: 6px; --cds-gap-sm: 10px; --cds-gap-md: 16px; --cds-gap-lg: 24px;
+  --cds-pad-xs: 4px; --cds-pad-sm: 8px; --cds-pad-md: 12px; --cds-pad-lg: 20px;
+  --cds-radius: 10px; --cds-dur-slow: .3s;
+  --cds-font-size-caption: 13px; --cds-font-size-body: 15px; --cds-font-size-heading: 16px; --cds-font-size-title: 30px;
+  --cds-font-weight-medium: 600;
+  --c1: #2a78d6; --c2: #eb6834;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #111413; --color-panel: #171a19; --color-fg: #eef0ec; --color-fg-muted: #a3aba6;
+    --color-border-line: #2c312f; --color-bad: #e2703f;
+    --cds-border: #353b38; --cds-surface-popover: #202423; --cds-text-secondary: #a3aba6;
+    --cds-shadow-popover: 0 4px 16px rgba(0,0,0,.5);
+    --cds-chart-muted: #4d5551; --cds-chart-grid: #262b29; --cds-chart-reference: #7d8681;
+    --cds-chart-status-critical: #f0705e;
+    --c1: #3d86e0; --c2: #d6622f;
+  }
+}
+:root[data-theme="dark"] {
+  --color-bg: #111413; --color-panel: #171a19; --color-fg: #eef0ec; --color-fg-muted: #a3aba6;
+  --color-border-line: #2c312f; --color-bad: #e2703f;
+  --cds-border: #353b38; --cds-surface-popover: #202423; --cds-text-secondary: #a3aba6;
+  --cds-shadow-popover: 0 4px 16px rgba(0,0,0,.5);
+  --cds-chart-muted: #4d5551; --cds-chart-grid: #262b29; --cds-chart-reference: #7d8681;
+  --cds-chart-status-critical: #f0705e;
+  --c1: #3d86e0; --c2: #d6622f;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--color-bg); color: var(--color-fg); }
+.page { max-width: 1180px; margin: 0 auto; padding: 32px 16px 48px; }
+.foot { margin-top: 32px; font: 13px/1.5 var(--font-anthropic-sans); color: var(--color-fg-muted); }
+.foot a { color: inherit; }
+</style>
+</head>
+<body>
+<div class="page">
+<!--BODY-->
+<p class="foot">Every number comes from the CSV files in <a href="https://github.com/Newnew-niu/online-grocery-customer-journey/tree/main/reports/dashboard_data">reports/dashboard_data</a>, made by the project scripts. Built with <code>src/41_build_static_dashboard.py</code>.</p>
+</div>
+<script>
+// Small stand-in for the hosted dashboard API: the data is inlined at build time.
+(function () {
+  const DATA = /*DATA*/;
+  const listeners = [];
+  const readColors = () => { const s = getComputedStyle(document.documentElement); return [s.getPropertyValue('--c1').trim(), s.getPropertyValue('--c2').trim()]; };
+  const fire = () => { window.dash.colors = readColors(); listeners.forEach((fn) => fn()); };
+  window.dash = {
+    colors: [],
+    data: (id) => (DATA[id] ? { status: 'ok', data: DATA[id] } : { status: 'error' }),
+    onData: (fn) => { listeners.push(fn); fire(); },
+    setLink: (name) => { history.replaceState(null, '', '#' + name); }
+  };
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', fire);
+  let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(fire, 150); });
+})();
+</script>
+<!--SCRIPT-->
+</body>
+</html>

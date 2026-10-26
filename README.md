@@ -11,6 +11,8 @@ An end-to-end analysis of the online grocery customer journey, built with **real
 
 > **Data honesty note:** no dataset here is Tesco data. Each module states where its data comes from and what it can and cannot show.
 
+**See the results:** [interactive dashboard](https://newnew-niu.github.io/online-grocery-customer-journey/) · [slide deck (PPTX)](slides/Online_Grocery_Customer_Journey.pptx) · [executive summary](reports/executive_summary.md)
+
 ---
 
 ## Key findings
@@ -100,6 +102,7 @@ Run the scripts in number order from the `src` folder:
 | | `python 20_run_ga4_query.py --project YOUR_GCP_PROJECT` | `data/raw/ga4/ga4_sessions.parquet` (free BigQuery sandbox is enough) |
 | | `python 21_ga4_funnel.py` | funnel tables, baselines, figures |
 | Module 4 | `python 30_ab_test_design.py`, `python 31_ab_test_simulated_analysis.py` | power table, simulated analysis |
+| Dashboard | `python 40_dashboard_exports.py`, `python 41_build_static_dashboard.py` | `reports/dashboard_data/*.csv`, `docs/index.html` |
 
 **Notes**
 
@@ -115,4 +118,8 @@ sql/               BigQuery SQL
 src/               numbered Python scripts (+ shared helpers)
 reports/           module write-ups, result tables, executive summary
 reports/figures/   all charts
+reports/dashboard_data/  small summary tables used by the dashboard
+dashboard/         dashboard layout and page shell
+docs/              built dashboard page (served by GitHub Pages)
+slides/            slide deck (PPTX)
 ```

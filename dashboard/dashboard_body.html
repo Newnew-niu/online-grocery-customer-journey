@@ -1,0 +1,537 @@
+<style>
+.gj { font-family: var(--font-anthropic-sans); color: var(--color-fg); display: flex; flex-direction: column; gap: var(--cds-gap-lg); }
+.gj-head { display: flex; flex-direction: column; gap: var(--cds-gap-xs); }
+.gj-title { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; }
+.gj-lede { color: var(--color-fg-muted); font-size: var(--cds-font-size-body); margin: 0; max-width: 70ch; line-height: 1.5; }
+.gj-lede b { color: var(--color-fg); font-weight: 600; }
+.gj-tabs { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs); border-bottom: 1px solid var(--color-border-line); }
+.gj-tab { appearance: none; background: none; border: 0; border-bottom: 2px solid transparent; padding: var(--cds-pad-sm) var(--cds-pad-md); font: inherit; font-size: var(--cds-font-size-body); color: var(--color-fg-muted); cursor: pointer; margin-bottom: -1px; }
+.gj-tab:hover { color: var(--color-fg); }
+.gj-tab[aria-selected="true"] { color: var(--color-fg); border-bottom-color: var(--color-fg); font-weight: 600; }
+.gj-tab:focus-visible, .gj-chip:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+.gj-page { display: flex; flex-direction: column; gap: var(--cds-gap-md); }
+.gj-page[hidden] { display: none; }
+.gj-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: var(--cds-gap-md); }
+.gj-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); gap: var(--cds-gap-md); }
+.gj-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: flex; flex-direction: column; gap: var(--cds-gap-sm); min-width: 0; }
+.gj-card h3 { margin: 0; font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); }
+.gj-note { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); line-height: 1.45; }
+.gj-tile { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-md) var(--cds-pad-lg); display: flex; flex-direction: column; gap: var(--cds-gap-xs); }
+.gj-tile-label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.gj-big { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); font-variant-numeric: tabular-nums; line-height: 1.1; min-height: 1.1em; }
+.gj-tile-sub { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.gj-section { margin: var(--cds-gap-sm) 0 0; font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); }
+.gj-chips { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs); }
+.gj-chip { appearance: none; font: inherit; font-size: var(--cds-font-size-caption); padding: var(--cds-pad-xs) var(--cds-pad-sm); border-radius: 999px; border: 1px solid var(--color-border-line); background: var(--color-bg); color: var(--color-fg); cursor: pointer; }
+.gj-chip[aria-pressed="true"] { background: var(--color-fg); color: var(--color-bg); border-color: var(--color-fg); }
+.gj-chart { position: relative; width: 100%; min-height: 260px; }
+.gj-chart svg { display: block; overflow: visible; }
+.gj-tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); white-space: nowrap; z-index: 2; }
+.gj-tip .k { color: var(--cds-text-secondary); }
+.gj-tablewrap { overflow-x: auto; }
+.gj-table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+.gj-table th { text-align: left; font-weight: 600; color: var(--color-fg-muted); padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); }
+.gj-table td { padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); }
+.gj-table .num { text-align: right; }
+.gj-table tr.grp td { font-weight: 600; color: var(--color-fg-muted); padding-top: var(--cds-pad-sm); }
+.gj-bar { display: flex; align-items: center; gap: var(--cds-gap-xs); justify-content: flex-end; }
+.gj-bar i { display: inline-block; height: 8px; border-radius: 4px; background: var(--cds-chart-muted); }
+.gj-banner { border: 1px dashed var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-sm) var(--cds-pad-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.gj-banner b { color: var(--color-fg); }
+.gj-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.gj-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.gj-legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.gj-list { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: var(--cds-gap-xs); font-size: var(--cds-font-size-body); line-height: 1.45; }
+[data-dash-source-state=empty] { color: transparent; }
+[data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+.gj-fail { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 120px; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.gj-fail::before { content: ""; width: .375rem; height: .375rem; border-radius: 50%; background: var(--color-bad); }
+</style>
+
+<div class="gj" id="gj">
+  <header class="gj-head">
+    <h1 class="gj-title" id="title">Grocery Journey Dashboard</h1>
+    <p class="gj-lede" id="lede">App speed is the top complaint (<b data-source="pain_points" data-field="share_of_negative" data-where="retailer=All three&amp;stage=App performance (crashes, speed)" data-fmt="pct0">—</b> of negative reviews), only <b data-source="funnel_steps" data-field="step_conversion_closed" data-where="step=add_to_cart" data-fmt="pct0">—</b> of product views reach the cart, and Champions bring <b data-source="rfm_segments" data-field="share_spend" data-where="segment=Champions" data-fmt="pct0">—</b> of spend. Fixing checkout payment is the first test to run.</p>
+  </header>
+
+  <nav class="gj-tabs" role="tablist" aria-label="Dashboard sections">
+    <button class="gj-tab" role="tab" id="tab-overview" data-tab="overview" aria-selected="true">Overview</button>
+    <button class="gj-tab" role="tab" id="tab-complaints" data-tab="complaints" aria-selected="false">Complaints</button>
+    <button class="gj-tab" role="tab" id="tab-funnel" data-tab="funnel" aria-selected="false">Funnel</button>
+    <button class="gj-tab" role="tab" id="tab-customers" data-tab="customers" aria-selected="false">Customers</button>
+    <button class="gj-tab" role="tab" id="tab-test" data-tab="test" aria-selected="false">A/B test</button>
+  </nav>
+
+  <!-- OVERVIEW -->
+  <section class="gj-page" id="overview" data-page="overview">
+    <div class="gj-tiles">
+      <div class="gj-tile"><span class="gj-tile-label">Reviews analysed</span><span class="gj-big" data-source="reviews_summary" data-field="reviews" data-where="retailer=All three" data-fmt="int">—</span><span class="gj-tile-sub">3 Irish grocery apps</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Top complaint: app speed</span><span class="gj-big" data-source="pain_points" data-field="share_of_negative" data-where="retailer=All three&amp;stage=App performance (crashes, speed)" data-fmt="pct1">—</span><span class="gj-tile-sub">of negative reviews</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Session conversion</span><span class="gj-big" data-source="ga4_baselines" data-field="value" data-where="metric=overall_conversion" data-fmt="pct2">—</span><span class="gj-tile-sub">GA4 web sessions</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Cart abandonment</span><span class="gj-big" data-source="ga4_baselines" data-field="value" data-where="metric=cart_abandonment" data-fmt="pct1">—</span><span class="gj-tile-sub">carts with no purchase</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Champions’ share of spend</span><span class="gj-big" data-source="rfm_segments" data-field="share_spend" data-where="segment=Champions" data-fmt="pct0">—</span><span class="gj-tile-sub"><span data-source="rfm_segments" data-field="share_households" data-where="segment=Champions" data-fmt="pct0">—</span> of households</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">A/B test size</span><span class="gj-big" data-source="ab_design" data-field="value" data-where="metric=n_per_group" data-fmt="int">—</span><span class="gj-tile-sub">users per group (designed)</span></div>
+    </div>
+    <div class="gj-grid">
+      <div class="gj-card">
+        <h3>The story in four steps</h3>
+        <ol class="gj-list">
+          <li><b>Complaints:</b> what app users say is broken.</li>
+          <li><b>Funnel:</b> where web shoppers drop off.</li>
+          <li><b>Customers:</b> who drives spend, and whether campaigns and coupons work.</li>
+          <li><b>A/B test:</b> how we would test the top fixable problem.</li>
+        </ol>
+      </div>
+      <div class="gj-card">
+        <h3>Where the data comes from</h3>
+        <ul class="gj-list">
+          <li><b>App reviews:</b> Google Play and App Store, Irish stores, Oct 2024 to Oct 2026. Self-selected, skew negative.</li>
+          <li><b>Web funnel:</b> GA4 public sample, Google Merchandise Store. Real e-commerce, not grocery.</li>
+          <li><b>Customers:</b> The Complete Journey (84.51° release), an anonymised US grocer in 2017.</li>
+          <li>None of it is Tesco data.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPLAINTS -->
+  <section class="gj-page" id="complaints" data-page="complaints" hidden>
+    <div class="gj-chips" role="group" aria-label="Retailer" id="retailer-chips">
+      <button class="gj-chip" id="chip-all" data-r="All three" aria-pressed="true">All three</button>
+      <button class="gj-chip" id="chip-tesco" data-r="Tesco" aria-pressed="false">Tesco Ireland</button>
+      <button class="gj-chip" id="chip-dunnes" data-r="Dunnes Stores" aria-pressed="false">Dunnes Stores</button>
+      <button class="gj-chip" id="chip-supervalu" data-r="SuperValu" aria-pressed="false">SuperValu</button>
+    </div>
+    <div class="gj-grid">
+      <div class="gj-card" style="grid-column: 1 / -1;">
+        <h3 id="pain-title">Share of negative reviews that mention each stage</h3>
+        <p class="gj-note">Negative = 1 or 2 stars. Lines show the 95% interval. One review can mention several stages.</p>
+        <div class="gj-chart" id="pain-chart" data-source="pain_points"></div>
+      </div>
+      <div class="gj-card">
+        <h3>Ratings by stage</h3>
+        <p class="gj-note">Average stars of all reviews that mention the stage. Lower means more painful.</p>
+        <div class="gj-tablewrap">
+          <table class="gj-table" id="pain-table" data-source="pain_points" data-row-key="retailer,stage">
+            <thead><tr><th data-field="stage">Stage</th><th class="num" data-field="share_of_negative">Share of negative</th><th class="num" data-field="avg_rating_when_mentioned">Avg stars</th><th class="num" data-field="negative_mentioning">Negative reviews</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="gj-card">
+        <h3>Reviews per retailer</h3>
+        <p class="gj-note">SuperValu has the fewest reviews but the highest share of negative ones.</p>
+        <div class="gj-tablewrap">
+          <table class="gj-table" id="rev-table" data-source="reviews_summary" data-row-key="retailer">
+            <thead><tr><th data-field="retailer">Retailer</th><th class="num" data-field="reviews">Reviews</th><th class="num" data-field="avg_rating">Avg stars</th><th class="num" data-field="negative_share">Negative</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <h3 style="margin-top: var(--cds-gap-sm);">How accurate is the tagging?</h3>
+        <p class="gj-note">Checked on 100 hand-labelled negative reviews that were not used to write the rules.</p>
+        <div class="gj-tiles">
+          <div class="gj-tile"><span class="gj-tile-label">Precision</span><span class="gj-big" data-source="tag_validation_test" data-field="precision" data-where="stage=ALL STAGES (micro average)" data-fmt="num2">—</span></div>
+          <div class="gj-tile"><span class="gj-tile-label">Recall</span><span class="gj-big" data-source="tag_validation_test" data-field="recall" data-where="stage=ALL STAGES (micro average)" data-fmt="num2">—</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FUNNEL -->
+  <section class="gj-page" id="funnel" data-page="funnel" hidden>
+    <div class="gj-tiles">
+      <div class="gj-tile"><span class="gj-tile-label">Session conversion</span><span class="gj-big" data-source="ga4_baselines" data-field="value" data-where="metric=overall_conversion" data-fmt="pct2">—</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Cart abandonment</span><span class="gj-big" data-source="ga4_baselines" data-field="value" data-where="metric=cart_abandonment" data-fmt="pct1">—</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Checkout abandonment</span><span class="gj-big" data-source="ga4_baselines" data-field="value" data-where="metric=checkout_abandonment" data-fmt="pct1">—</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Payment → purchase</span><span class="gj-big" data-source="ga4_baselines" data-field="value" data-where="metric=payment_to_purchase" data-fmt="pct1">—</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Average order value</span><span class="gj-big" data-source="ga4_baselines" data-field="value" data-where="metric=aov_usd" data-fmt="usd2">—</span></div>
+    </div>
+    <div class="gj-grid">
+      <div class="gj-card" style="grid-column: 1 / -1;">
+        <h3>Purchase funnel</h3>
+        <p class="gj-note" id="funnel-note">Closed funnel: a session counts at a step only if it also did every earlier step in the same visit. The biggest drop is in red.</p>
+        <div class="gj-chips" role="group" aria-label="Funnel type">
+          <button class="gj-chip" id="fun-closed" data-f="closed" aria-pressed="true">Closed funnel</button>
+          <button class="gj-chip" id="fun-open" data-f="open" aria-pressed="false">Open funnel</button>
+        </div>
+        <div class="gj-chart" id="funnel-chart" data-source="funnel_steps" style="min-height: 240px;"></div>
+      </div>
+      <div class="gj-card" style="grid-column: 1 / -1;">
+        <h3>Conversion by segment</h3>
+        <p class="gj-note">Device makes almost no difference. New users convert far less, and stall between checkout and payment.</p>
+        <div class="gj-tablewrap">
+          <table class="gj-table" id="seg-table" data-source="funnel_segments" data-row-key="segment">
+            <thead><tr><th data-field="segment">Segment</th><th data-field="segment_type">Group</th><th class="num" data-field="sessions">Sessions</th><th class="num" data-field="conversion_rate">Conversion</th><th class="num" data-field="cart_abandonment">Cart abandonment</th><th class="num" data-field="checkout_to_payment">Checkout → payment</th><th class="num" data-field="aov_usd">AOV</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <p class="gj-banner"><b>Data:</b> GA4 public sample (Google Merchandise Store), Nov 2020 to Jan 2021. Real e-commerce web data, not grocery.</p>
+  </section>
+
+  <!-- CUSTOMERS -->
+  <section class="gj-page" id="customers" data-page="customers" hidden>
+    <div class="gj-tiles">
+      <div class="gj-tile"><span class="gj-tile-label">Households</span><span class="gj-big" data-source="cj_kpis" data-field="value" data-where="kpi=households" data-fmt="int">—</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Average basket</span><span class="gj-big" data-source="cj_kpis" data-field="value" data-where="kpi=aov_usd_mean" data-fmt="usd2">—</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Items per basket</span><span class="gj-big" data-source="cj_kpis" data-field="value" data-where="kpi=items_per_basket_mean" data-fmt="num1">—</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Days between trips (median)</span><span class="gj-big" data-source="cj_kpis" data-field="value" data-where="kpi=inter_purchase_days_median" data-fmt="int">—</span></div>
+    </div>
+    <div class="gj-grid">
+      <div class="gj-card" style="grid-column: 1 / -1;">
+        <h3>RFM segments: share of households vs share of spend</h3>
+        <p class="gj-note">Recency, frequency and spend scored 1–5. Champions and Loyal households carry most of the spend.</p>
+        <div class="gj-legend" id="rfm-legend" data-source="rfm_segments"></div>
+        <div class="gj-chart" id="rfm-chart" data-source="rfm_segments" style="min-height: 300px;"></div>
+      </div>
+      <div class="gj-card">
+        <h3>Did campaigns lift weekly spend?</h3>
+        <p class="gj-note">Difference-in-differences, USD per household per week, with 95% intervals. Every interval crosses zero, so no clear lift.</p>
+        <div class="gj-chart" id="did-chart" data-source="campaign_did" style="min-height: 280px;"></div>
+      </div>
+      <div class="gj-card">
+        <h3>Are coupon users less loyal?</h3>
+        <p class="gj-note">Coupon use Jan–Jun, loyalty Jul–Dec. Coupon users lapse less than non-users.</p>
+        <div class="gj-tablewrap">
+          <table class="gj-table" id="coupon-table" data-source="coupon_groups" data-row-key="group">
+            <thead><tr><th data-field="group">Coupon use</th><th class="num" data-field="households">Households</th><th class="num" data-field="h2_active_week_share_mean">Active weeks</th><th class="num" data-field="lapsed_rate">Lapsed</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <p class="gj-banner"><b>Data:</b> The Complete Journey (84.51° release), anonymised US grocer, 2017. Not Tesco data. Campaigns were not randomised.</p>
+  </section>
+
+  <!-- A/B TEST -->
+  <section class="gj-page" id="test" data-page="test" hidden>
+    <p class="gj-banner"><b>Designed, not run.</b> The baseline comes from the real GA4 funnel. Nothing on this tab is a test result.</p>
+    <div class="gj-tiles">
+      <div class="gj-tile"><span class="gj-tile-label">Baseline: payment → purchase</span><span class="gj-big" data-source="ab_design" data-field="value" data-where="metric=baseline_user_payment_to_purchase" data-fmt="pct1">—</span><span class="gj-tile-sub">users who reach payment</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Smallest lift to detect</span><span class="gj-big"><span data-source="ab_design" data-field="value" data-where="metric=mde_abs_points" data-fmt="pts">—</span></span><span class="gj-tile-sub">percentage points</span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Users per group</span><span class="gj-big" data-source="ab_design" data-field="value" data-where="metric=n_per_group" data-fmt="int">—</span><span class="gj-tile-sub">power <span data-source="ab_design" data-field="value" data-where="metric=power" data-fmt="pct0">—</span>, alpha <span data-source="ab_design" data-field="value" data-where="metric=alpha" data-fmt="num2">—</span></span></div>
+      <div class="gj-tile"><span class="gj-tile-label">Weeks at GA4 traffic</span><span class="gj-big" data-source="ab_design" data-field="value" data-where="metric=weeks_at_ga4_traffic" data-fmt="int">—</span><span class="gj-tile-sub">fewer at a bigger retailer</span></div>
+    </div>
+    <div class="gj-grid">
+      <div class="gj-card">
+        <h3>Test plan: one-tap wallet payment</h3>
+        <ul class="gj-list">
+          <li><b>Change:</b> add Apple Pay / Google Pay to the payment page.</li>
+          <li><b>Why:</b> payment complaints in reviews, and a real drop at the payment step.</li>
+          <li><b>Unit:</b> user, 50/50, analysed once they reach the payment page.</li>
+          <li><b>Guardrails:</b> order value, overall conversion, payment errors, page speed.</li>
+          <li><b>Rules:</b> check the split first, no peeking, ship only if the main metric is up and no guardrail is harmed.</li>
+        </ul>
+      </div>
+      <div class="gj-card">
+        <h3>Sample size for different effects</h3>
+        <p class="gj-note">Smaller effects need far more users. Measuring every visitor, not just those at payment, would need far more.</p>
+        <div class="gj-tablewrap">
+          <table class="gj-table" id="power-table" data-source="ab_power" data-row-key="scenario">
+            <thead><tr><th data-field="scenario">Effect</th><th class="num" data-field="target">Target rate</th><th class="num" data-field="n_per_group">Users per group</th><th class="num" data-field="weeks_needed">Weeks</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  const root = document.getElementById('gj');
+  const FMT = {
+    int: d3.format(','), pct0: d3.format('.0%'), pct1: d3.format('.1%'), pct2: d3.format('.2%'),
+    num1: d3.format('.1f'), num2: d3.format('.2f'), usd2: (v) => '$' + d3.format(',.2f')(v),
+    pts: (v) => '+' + d3.format('.0f')(v)
+  };
+  const state = { retailer: 'All three', funnel: 'closed', tab: 'overview' };
+
+  const rowsOf = (id) => { const d = dash.data(id); return d.status === 'ok' ? d.data : null; };
+  const statusOf = (id) => dash.data(id).status;
+  const parseWhere = (s) => s.split('&').map((p) => { const i = p.indexOf('='); return [decodeURIComponent(p.slice(0, i)), decodeURIComponent(p.slice(i + 1))]; });
+  const findRow = (rows, where) => rows.find((r) => where.every(([k, v]) => String(r[k]) === v));
+  const num = (x) => Number(x);
+  const css = (name) => `var(${name})`;
+
+  // ---- tabs ----
+  function showTab(name) {
+    state.tab = name;
+    root.querySelectorAll('.gj-tab').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
+    root.querySelectorAll('.gj-page').forEach((p) => { p.hidden = p.dataset.page !== name; });
+    dash.setLink(name);
+    draw();
+  }
+  root.querySelectorAll('.gj-tab').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
+  root.querySelectorAll('#retailer-chips .gj-chip').forEach((b) => b.addEventListener('click', () => {
+    state.retailer = b.dataset.r;
+    root.querySelectorAll('#retailer-chips .gj-chip').forEach((c) => c.setAttribute('aria-pressed', String(c === b)));
+    draw();
+  }));
+  root.querySelectorAll('[data-f]').forEach((b) => b.addEventListener('click', () => {
+    state.funnel = b.dataset.f;
+    root.querySelectorAll('[data-f]').forEach((c) => c.setAttribute('aria-pressed', String(c === b)));
+    draw();
+  }));
+
+  // ---- single values ----
+  function fillMarks() {
+    root.querySelectorAll('[data-fmt]').forEach((el) => {
+      const id = el.dataset.source;
+      const rows = rowsOf(id);
+      if (!rows) { el.textContent = '—'; el.classList.toggle('dash-skeleton', statusOf(id) === 'loading'); return; }
+      el.classList.remove('dash-skeleton');
+      const r = findRow(rows, parseWhere(el.dataset.where));
+      const v = r ? num(r[el.dataset.field]) : NaN;
+      el.textContent = Number.isFinite(v) ? FMT[el.dataset.fmt](v) : '—';
+    });
+  }
+
+  // ---- helpers ----
+  function failBox(box, id) {
+    box.innerHTML = '';
+    const s = statusOf(id);
+    if (s === 'loading') { box.classList.add('dash-skeleton'); return true; }
+    box.classList.remove('dash-skeleton');
+    if (s !== 'ok') { const d = document.createElement('div'); d.className = 'gj-fail'; d.textContent = 'Failed to load'; box.appendChild(d); return true; }
+    return false;
+  }
+  function textWidth(svg, strings, size) {
+    const t = svg.append('text').attr('font-size', size).style('font-family', 'var(--font-anthropic-sans)');
+    let w = 0;
+    strings.forEach((s) => { t.text(s); w = Math.max(w, t.node().getComputedTextLength()); });
+    t.remove();
+    return w;
+  }
+  function tooltip(box) {
+    const tip = document.createElement('div');
+    tip.className = 'gj-tip'; tip.hidden = true; box.appendChild(tip);
+    return {
+      show(ev, lines) {
+        tip.replaceChildren();
+        lines.forEach(([k, v], i) => { const div = document.createElement('div'); if (i === 0) { div.className = 'k'; div.textContent = k; } else { div.textContent = k + ': ' + v; } tip.appendChild(div); });
+        tip.hidden = false;
+        const b = box.getBoundingClientRect();
+        let x = ev.clientX - b.left + 12, y = ev.clientY - b.top + 12;
+        const w = tip.offsetWidth;
+        if (x + w > b.width) x = Math.max(0, ev.clientX - b.left - w - 12);
+        tip.style.left = x + 'px'; tip.style.top = y + 'px';
+      },
+      hide() { tip.hidden = true; }
+    };
+  }
+  function fillTable(id, sel, rows, cells, keyFn, groupBy) {
+    const tbody = root.querySelector(sel + ' tbody');
+    tbody.replaceChildren();
+    if (!rows) return;
+    let last = null;
+    rows.forEach((r) => {
+      if (groupBy && r[groupBy] !== last) {
+        last = r[groupBy];
+        const g = document.createElement('tr'); g.className = 'grp';
+        const td = document.createElement('td'); td.colSpan = cells.length; td.textContent = last;
+        g.appendChild(td); tbody.appendChild(g);
+      }
+      const tr = document.createElement('tr');
+      if (keyFn) tr.dataset.key = keyFn(r);
+      cells.forEach((c) => {
+        const td = document.createElement('td');
+        if (c.num) td.className = 'num';
+        if (c.bar) {
+          const wrap = document.createElement('span'); wrap.className = 'gj-bar';
+          const i = document.createElement('i'); i.style.width = Math.round(c.bar(r) * 60) + 'px';
+          if (c.barColor) i.style.background = c.barColor;
+          const t = document.createElement('span'); t.textContent = c.f(r);
+          wrap.append(i, t); td.appendChild(wrap);
+        } else { td.textContent = c.f(r); }
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ---- complaints ----
+  function drawPain() {
+    const box = root.querySelector('#pain-chart');
+    if (failBox(box, 'pain_points')) return;
+    const rows = rowsOf('pain_points').filter((r) => r.retailer === state.retailer)
+      .map((r) => ({ stage: r.stage, v: num(r.share_of_negative), lo: num(r.ci_low), hi: num(r.ci_high), n: num(r.negative_mentioning), N: num(r.negative_reviews) }))
+      .sort((a, b) => b.v - a.v);
+    root.querySelector('#pain-title').textContent = 'Share of negative reviews that mention each stage · ' + (state.retailer === 'Tesco' ? 'Tesco Ireland' : state.retailer);
+    const W = box.clientWidth, rowH = 30, top = 8, bottom = 28;
+    const H = top + rows.length * rowH + bottom;
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('height', H);
+    const fs = 12;
+    const labW = Math.min(W * 0.45, textWidth(svg, rows.map((d) => d.stage), fs) + 12);
+    const endW = textWidth(svg, ['00%'], fs) + 10;
+    const x = d3.scaleLinear([0, Math.max(0.1, d3.max(rows, (d) => d.hi))], [labW, W - endW]).nice();
+    const y = d3.scaleBand(rows.map((d) => d.stage), [top, top + rows.length * rowH]).padding(0.3);
+    const ticks = x.ticks(Math.max(2, Math.floor((W - labW) / 90)));
+    svg.append('g').selectAll('line').data(ticks).join('line').attr('x1', x).attr('x2', x).attr('y1', top).attr('y2', H - bottom).style('stroke', css('--cds-chart-grid'));
+    svg.append('g').selectAll('text').data(ticks).join('text').attr('x', x).attr('y', H - 8).attr('text-anchor', 'middle').attr('font-size', fs).style('fill', css('--color-fg-muted')).text(d3.format('.0%'));
+    const accent = dash.colors[0];
+    const g = svg.append('g').selectAll('g').data(rows).join('g');
+    g.append('text').attr('x', labW - 10).attr('y', (d) => y(d.stage) + y.bandwidth() / 2).attr('dy', '0.35em').attr('text-anchor', 'end').attr('font-size', fs).style('fill', css('--color-fg')).text((d) => d.stage);
+    g.append('rect').attr('x', x(0)).attr('y', (d) => y(d.stage)).attr('height', y.bandwidth()).attr('width', (d) => Math.max(0, x(d.v) - x(0))).attr('rx', 4)
+      .style('fill', (d, i) => (i < 3 ? accent : css('--cds-chart-muted')));
+    g.append('line').attr('x1', (d) => x(d.lo)).attr('x2', (d) => x(d.hi)).attr('y1', (d) => y(d.stage) + y.bandwidth() / 2).attr('y2', (d) => y(d.stage) + y.bandwidth() / 2).style('stroke', css('--color-fg')).attr('stroke-width', 1.5).attr('opacity', 0.55);
+    g.append('text').attr('x', (d) => x(d.hi) + 6).attr('y', (d) => y(d.stage) + y.bandwidth() / 2).attr('dy', '0.35em').attr('font-size', fs).style('fill', css('--color-fg-muted')).text((d) => d3.format('.0%')(d.v));
+    const tip = tooltip(box);
+    g.append('rect').attr('x', 0).attr('width', W).attr('y', (d) => y(d.stage) - 4).attr('height', y.bandwidth() + 8).attr('fill', 'transparent')
+      .on('mousemove', (ev, d) => tip.show(ev, [[d.stage], ['Share', d3.format('.1%')(d.v)], ['95% interval', d3.format('.1%')(d.lo) + ' – ' + d3.format('.1%')(d.hi)], ['Reviews', d3.format(',')(d.n) + ' of ' + d3.format(',')(d.N)]]))
+      .on('mouseleave', () => tip.hide());
+  }
+  function painTables() {
+    const p = rowsOf('pain_points');
+    fillTable('pain_points', '#pain-table', p ? p.filter((r) => r.retailer === state.retailer).sort((a, b) => num(a.avg_rating_when_mentioned) - num(b.avg_rating_when_mentioned)) : null, [
+      { f: (r) => r.stage },
+      { num: 1, f: (r) => d3.format('.1%')(num(r.share_of_negative)) },
+      { num: 1, f: (r) => d3.format('.2f')(num(r.avg_rating_when_mentioned)) },
+      { num: 1, f: (r) => d3.format(',')(num(r.negative_mentioning)) }
+    ], (r) => encodeURIComponent(r.retailer) + ',' + encodeURIComponent(r.stage));
+    const s = rowsOf('reviews_summary');
+    const order = ['Tesco', 'Dunnes Stores', 'SuperValu', 'All three'];
+    fillTable('reviews_summary', '#rev-table', s ? order.map((k) => s.find((r) => r.retailer === k)).filter(Boolean) : null, [
+      { f: (r) => r.retailer },
+      { num: 1, f: (r) => d3.format(',')(num(r.reviews)) },
+      { num: 1, f: (r) => d3.format('.2f')(num(r.avg_rating)) },
+      { num: 1, f: (r) => d3.format('.1%')(num(r.negative_share)) }
+    ]);
+  }
+
+  // ---- funnel ----
+  function drawFunnel() {
+    const box = root.querySelector('#funnel-chart');
+    if (failBox(box, 'funnel_steps')) return;
+    const col = state.funnel === 'closed' ? 'closed' : 'open';
+    root.querySelector('#funnel-note').textContent = col === 'closed'
+      ? 'Closed funnel: a session counts at a step only if it also did every earlier step in the same visit. The biggest drop is in red.'
+      : 'Open funnel: every session with the event, even if an earlier step happened in another visit. The biggest drop is in red.';
+    const rows = rowsOf('funnel_steps').map((r) => ({ label: r.step_label, n: num(r['sessions_' + col]), sc: num(r['step_conversion_' + col]), order: num(r.step_order) })).sort((a, b) => a.order - b.order);
+    const worst = rows.slice(1).reduce((m, d) => (d.sc < m.sc ? d : m), rows[1]);
+    const W = box.clientWidth, rowH = 42, top = 4;
+    const H = top + rows.length * rowH + 4;
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('height', H);
+    const fs = 12;
+    const labW = textWidth(svg, rows.map((d) => d.label), fs) + 14;
+    const endW = textWidth(svg, rows.map((d) => d3.format(',')(d.n) + '   lost 80% from previous step'), fs) + 8;
+    const x = d3.scaleLinear([0, d3.max(rows, (d) => d.n)], [labW, Math.max(labW + 40, W - endW)]);
+    const y = d3.scaleBand(rows.map((d) => d.label), [top, H - 4]).padding(0.28);
+    const g = svg.selectAll('g').data(rows).join('g');
+    g.append('text').attr('x', labW - 10).attr('y', (d) => y(d.label) + y.bandwidth() / 2).attr('dy', '0.35em').attr('text-anchor', 'end').attr('font-size', fs).style('fill', css('--color-fg')).text((d) => d.label);
+    g.append('rect').attr('x', x(0)).attr('y', (d) => y(d.label)).attr('height', y.bandwidth()).attr('width', (d) => Math.max(2, x(d.n) - x(0))).attr('rx', 4).attr('fill', dash.colors[0]);
+    const lab = g.append('text').attr('x', (d) => x(d.n) + 8).attr('y', (d) => y(d.label) + y.bandwidth() / 2).attr('dy', '0.35em').attr('font-size', fs);
+    lab.append('tspan').style('fill', css('--color-fg')).text((d) => d3.format(',')(d.n));
+    lab.append('tspan').attr('dx', 10).style('fill', (d) => (d === worst ? css('--cds-chart-status-critical') : css('--color-fg-muted'))).attr('font-weight', (d) => (d === worst ? 600 : 400))
+      .text((d, i) => (i === 0 ? d3.format('.1%')(d.sc) + ' of all sessions' : 'lost ' + d3.format('.0%')(1 - d.sc) + ' from previous step'));
+  }
+  function segTable() {
+    const s = rowsOf('funnel_segments');
+    const order = ['Device', 'New vs returning', 'First-touch medium'];
+    const sorted = s ? s.slice().sort((a, b) => order.indexOf(a.segment_type) - order.indexOf(b.segment_type) || num(b.sessions) - num(a.sessions)) : null;
+    const maxC = s ? d3.max(s, (r) => num(r.conversion_rate)) : 1;
+    fillTable('funnel_segments', '#seg-table', sorted, [
+      { f: (r) => r.segment },
+      { f: (r) => r.segment_type },
+      { num: 1, f: (r) => d3.format(',')(num(r.sessions)) },
+      { num: 1, bar: (r) => num(r.conversion_rate) / maxC, barColor: dash.colors[0], f: (r) => d3.format('.2%')(num(r.conversion_rate)) },
+      { num: 1, f: (r) => d3.format('.1%')(num(r.cart_abandonment)) },
+      { num: 1, f: (r) => d3.format('.1%')(num(r.checkout_to_payment)) },
+      { num: 1, f: (r) => '$' + d3.format(',.2f')(num(r.aov_usd)) }
+    ]);
+  }
+
+  // ---- customers ----
+  function drawRfm() {
+    const box = root.querySelector('#rfm-chart');
+    const leg = root.querySelector('#rfm-legend');
+    leg.replaceChildren();
+    if (failBox(box, 'rfm_segments')) return;
+    const series = [['share_households', 'Share of households', dash.colors[0]], ['share_spend', 'Share of spend', dash.colors[1]]];
+    series.forEach(([, name, c]) => { const s = document.createElement('span'); const i = document.createElement('i'); i.style.background = c; s.append(i, document.createTextNode(name)); leg.appendChild(s); });
+    const rows = rowsOf('rfm_segments').map((r) => ({ seg: r.segment, n: num(r.households), share_households: num(r.share_households), share_spend: num(r.share_spend) }));
+    const W = box.clientWidth, top = 10, bottom = 8, groupH = 46;
+    const H = top + rows.length * groupH + bottom;
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('height', H);
+    const fs = 12;
+    const labW = textWidth(svg, rows.map((d) => d.seg), fs) + 14;
+    const x = d3.scaleLinear([0, d3.max(rows, (d) => Math.max(d.share_households, d.share_spend))], [labW, W - 44]);
+    const y = d3.scaleBand(rows.map((d) => d.seg), [top, H - bottom]).padding(0.2);
+    const yi = d3.scaleBand(series.map((s) => s[0]), [0, y.bandwidth()]).padding(0.12);
+    const tip = tooltip(box);
+    const g = svg.selectAll('g').data(rows).join('g').attr('transform', (d) => `translate(0,${y(d.seg)})`);
+    g.append('text').attr('x', labW - 10).attr('y', y.bandwidth() / 2).attr('dy', '0.35em').attr('text-anchor', 'end').attr('font-size', fs).style('fill', css('--color-fg')).text((d) => d.seg);
+    series.forEach(([k, , c]) => {
+      g.append('rect').attr('x', x(0)).attr('y', yi(k)).attr('height', yi.bandwidth()).attr('width', (d) => Math.max(0, x(d[k]) - x(0))).attr('rx', 4).attr('fill', c);
+      g.append('text').attr('x', (d) => x(d[k]) + 6).attr('y', yi(k) + yi.bandwidth() / 2).attr('dy', '0.35em').attr('font-size', 11).style('fill', css('--color-fg-muted')).text((d) => d3.format('.0%')(d[k]));
+    });
+    g.append('rect').attr('x', 0).attr('width', W).attr('height', y.bandwidth()).attr('fill', 'transparent')
+      .on('mousemove', (ev, d) => tip.show(ev, [[d.seg], ['Households', d3.format(',')(d.n)], ['Share of households', d3.format('.1%')(d.share_households)], ['Share of spend', d3.format('.1%')(d.share_spend)]]))
+      .on('mouseleave', () => tip.hide());
+  }
+  function drawDid() {
+    const box = root.querySelector('#did-chart');
+    if (failBox(box, 'campaign_did')) return;
+    const rows = rowsOf('campaign_did').filter((r) => r.control_group === 'not_this_campaign')
+      .map((r) => ({ label: r.label, v: num(r.did_usd_per_hh_week), lo: num(r.ci_low), hi: num(r.ci_high), p: num(r.p_value) }));
+    const W = box.clientWidth, top = 6, bottom = 30, rowH = 36;
+    const H = top + rows.length * rowH + bottom;
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('height', H);
+    const fs = 12;
+    const labW = Math.min(W * 0.5, textWidth(svg, rows.map((d) => d.label), fs) + 14);
+    const ext = Math.max(Math.abs(d3.min(rows, (d) => d.lo)), Math.abs(d3.max(rows, (d) => d.hi)));
+    const x = d3.scaleLinear([-ext, ext], [labW + 8, W - 12]).nice();
+    const y = d3.scaleBand(rows.map((d) => d.label), [top, H - bottom]).padding(0.3);
+    const ticks = x.ticks(Math.max(2, Math.floor((W - labW) / 70)));
+    svg.append('g').selectAll('line').data(ticks).join('line').attr('x1', x).attr('x2', x).attr('y1', top).attr('y2', H - bottom).style('stroke', css('--cds-chart-grid'));
+    svg.append('line').attr('x1', x(0)).attr('x2', x(0)).attr('y1', top).attr('y2', H - bottom).style('stroke', css('--cds-chart-reference')).attr('stroke-dasharray', '4 3');
+    svg.append('g').selectAll('text').data(ticks).join('text').attr('x', x).attr('y', H - 10).attr('text-anchor', 'middle').attr('font-size', fs).style('fill', css('--color-fg-muted')).text((d) => (d > 0 ? '+$' : d < 0 ? '−$' : '$') + Math.abs(d));
+    const tip = tooltip(box);
+    const g = svg.selectAll('g.r').data(rows).join('g').attr('class', 'r');
+    const cy = (d) => y(d.label) + y.bandwidth() / 2;
+    g.append('text').attr('x', labW - 6).attr('y', cy).attr('dy', '0.35em').attr('text-anchor', 'end').attr('font-size', fs).style('fill', css('--color-fg')).text((d) => d.label);
+    g.append('line').attr('x1', (d) => x(d.lo)).attr('x2', (d) => x(d.hi)).attr('y1', cy).attr('y2', cy).attr('stroke', dash.colors[0]).attr('stroke-width', 2).attr('stroke-linecap', 'round');
+    g.append('circle').attr('cx', (d) => x(d.v)).attr('cy', cy).attr('r', 5).attr('fill', dash.colors[0]).style('stroke', css('--color-panel')).attr('stroke-width', 2);
+    g.append('rect').attr('x', 0).attr('width', W).attr('y', (d) => y(d.label) - 4).attr('height', y.bandwidth() + 8).attr('fill', 'transparent')
+      .on('mousemove', (ev, d) => tip.show(ev, [[d.label], ['Estimate', (d.v >= 0 ? '+$' : '−$') + d3.format('.2f')(Math.abs(d.v)) + ' per week'], ['95% interval', d3.format('.2f')(d.lo) + ' to ' + d3.format('.2f')(d.hi)], ['p-value', d3.format('.3f')(d.p)]]))
+      .on('mouseleave', () => tip.hide());
+  }
+  function couponTable() {
+    const c = rowsOf('coupon_groups');
+    const order = ['No coupons', 'Light', 'Medium', 'Heavy'];
+    const maxL = c ? d3.max(c, (r) => num(r.lapsed_rate)) : 1;
+    fillTable('coupon_groups', '#coupon-table', c ? order.map((k) => c.find((r) => r.group === k)).filter(Boolean) : null, [
+      { f: (r) => r.group },
+      { num: 1, f: (r) => d3.format(',')(num(r.households)) },
+      { num: 1, f: (r) => d3.format('.1%')(num(r.h2_active_week_share_mean)) },
+      { num: 1, bar: (r) => num(r.lapsed_rate) / maxL, barColor: dash.colors[1], f: (r) => d3.format('.1%')(num(r.lapsed_rate)) }
+    ]);
+  }
+
+  // ---- A/B test ----
+  function powerTable() {
+    const p = rowsOf('ab_power');
+    fillTable('ab_power', '#power-table', p, [
+      { f: (r) => r.scenario },
+      { num: 1, f: (r) => d3.format('.1%')(num(r.target)) },
+      { num: 1, f: (r) => d3.format(',')(num(r.n_per_group)) },
+      { num: 1, f: (r) => d3.format(',')(num(r.weeks_needed)) }
+    ]);
+  }
+
+  function draw() {
+    fillMarks();
+    painTables(); segTable(); couponTable(); powerTable();
+    // charts need a visible box to measure, so only the open tab draws them
+    if (state.tab === 'complaints') drawPain();
+    if (state.tab === 'funnel') drawFunnel();
+    if (state.tab === 'customers') { drawRfm(); drawDid(); }
+  }
+
+  dash.onData(draw);
+
+  const named = document.getElementById(location.hash.slice(1));
+  if (named && named.dataset.page) showTab(named.dataset.page);
+})();
+</script>

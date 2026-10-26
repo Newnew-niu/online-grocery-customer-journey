@@ -32,6 +32,6 @@ data/processed/*_sample_blind.csv
 data/raw/ga4/
 data/processed/*.parquet
 
-# Slide deck and dashboard (built and hosted outside this repo)
+# Hosted copies of the deck and dashboard (the repo keeps slides/ and docs/ instead)
 presentation/
-*.pptx
+
