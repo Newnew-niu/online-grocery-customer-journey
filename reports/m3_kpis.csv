@@ -1,0 +1,16 @@
+kpi,value
+households,2467.0
+baskets,141029.0
+total_spend_usd,4185791.0
+aov_usd_mean,29.68
+aov_usd_median,16.0
+items_per_basket_mean,13.46
+items_per_basket_median,7.0
+baskets_per_household_mean,57.2
+baskets_per_household_median,40.0
+spend_per_household_mean_usd,1697.0
+inter_purchase_days_median,4.0
+inter_purchase_days_mean,6.7
+share_baskets_with_coupon,0.0575
+share_households_ever_coupon,0.59
+share_households_lapsed_before_nov,0.091

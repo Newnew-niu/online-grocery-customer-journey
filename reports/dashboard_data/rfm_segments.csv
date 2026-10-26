@@ -1,0 +1,8 @@
+segment,households,recency_days_median,baskets_median,spend_median_usd,aov_mean_usd,coupon_basket_share_mean,with_demographics,share_households,share_spend,top_age_band,share_with_kids,share_income_50k_plus
+Champions,520,2.0,97.0,3130.115,34.381,0.077,346,0.211,0.46,45-54,0.355,0.555
+Loyal,467,8.0,73.0,1703.82,27.34,0.05,253,0.189,0.249,45-54,0.32,0.443
+Big spenders,209,8.0,41.0,2155.17,66.509,0.105,119,0.085,0.122,45-54,0.429,0.605
+Promising,262,2.0,28.0,704.09,27.378,0.043,32,0.106,0.046,25-34,0.438,0.438
+Needs attention,238,8.0,25.0,568.09,26.572,0.036,18,0.096,0.036,45-54,0.278,0.5
+At risk,126,21.0,39.0,948.585,23.445,0.048,24,0.051,0.027,45-54,0.417,0.458
+Lapsed / low,645,39.0,12.0,279.26,29.678,0.038,9,0.261,0.059,25-34,0.444,0.778

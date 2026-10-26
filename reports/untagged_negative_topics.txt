@@ -1,0 +1,10 @@
+Untagged negative reviews: 119 of 609
+Median length: 12 words
+Share with 5 words or fewer: 21.8%
+
+Most common words: order (14), shopping (13), staff (12), shop (11), items (10), receipts (8), online (8), time (7), won (7), used (7), let (6), phone (6), update (6), address (6), does (6), need (6), self (5), notifications (5), useless (5), website (5), awful (5), poor (5), going (5), having (5), worse (5)
+
+Topic 1: update, receipts, order, phone, awful, address, waste, used, available, poor
+Topic 2: online, shopping, does, order, shop, going, years, better, open, experience
+Topic 3: won, shop, useless, did, let, bad, order, website, know, great
+Topic 4: items, staff, avoid, worse, shopping, terrible, friendly, good, date, getting

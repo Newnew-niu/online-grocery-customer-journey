@@ -1,0 +1,5 @@
+retailer,reviews,avg_rating,negative,negative_share
+Dunnes Stores,892.0,3.8744,212.0,0.2377
+SuperValu,266.0,2.6992,143.0,0.5376
+Tesco,933.0,3.7417,254.0,0.2722
+All three,2091.0,3.6657,609.0,0.2912

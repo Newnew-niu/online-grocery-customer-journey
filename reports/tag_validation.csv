@@ -1,0 +1,23 @@
+sample,stage,hand_labelled,rule_tagged,correct,precision,recall
+dev,Account & login,11,12,11,0.92,1.0
+dev,Search & browse,11,13,11,0.85,1.0
+dev,Basket / add to cart,5,3,3,1.0,0.6
+dev,Delivery slot booking,1,1,1,1.0,1.0
+dev,Checkout & payment,12,12,12,1.0,1.0
+dev,Substitutions & missing items,8,8,8,1.0,1.0
+dev,Delivery / collection,5,5,5,1.0,1.0
+dev,Refunds & customer service,12,14,12,0.86,1.0
+dev,"App performance (crashes, speed)",29,30,29,0.97,1.0
+dev,"Pricing, promotions & loyalty",35,36,35,0.97,1.0
+dev,ALL STAGES (micro average),129,134,127,0.95,0.98
+test,Account & login,23,21,17,0.81,0.74
+test,Search & browse,8,7,5,0.71,0.62
+test,Basket / add to cart,2,0,0,,0.0
+test,Delivery slot booking,2,2,2,1.0,1.0
+test,Checkout & payment,15,11,11,1.0,0.73
+test,Substitutions & missing items,6,3,3,1.0,0.5
+test,Delivery / collection,5,5,1,0.2,0.2
+test,Refunds & customer service,9,6,5,0.83,0.56
+test,"App performance (crashes, speed)",32,29,25,0.86,0.78
+test,"Pricing, promotions & loyalty",32,31,30,0.97,0.94
+test,ALL STAGES (micro average),134,115,99,0.86,0.74

@@ -1,0 +1,15 @@
+SIMULATED A/B TEST ANALYSIS - NOT REAL RESULTS
+================================================
+
+1. SRM check: control 2,926 vs treatment 2,992 users; chi-square p = 0.391 -> OK
+2. Primary metric (payment -> purchase): control 77.10%, treatment 78.74%
+   difference = +1.64 pts, 95% CI [-0.47, +3.75], z = 1.52, p = 0.1279
+3. Guardrail AOV: control $69.95, treatment $71.22 (+1.8%); Welch t-test p = 0.580
+4. Decision (pre-registered rules): DO NOT SHIP / keep testing - rules not met.
+
+5. Repeat check: in 2,000 simulated tests with a true +3 pt lift, 80.6% were significant (planned power: 80%).
+   So about 1 test in 5 misses a real effect of this size. The single run above is one of
+   those misses if it is not significant - this is why we fix the sample size in advance
+   and do not stop early or re-run until we get the answer we want.
+
+Simulation inputs: n per group = 2,959, control rate = 76.82% (real GA4 baseline), assumed true lift = +3.0 pts, seed = 2026.

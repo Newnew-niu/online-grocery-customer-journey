@@ -1,0 +1,37 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Credentials - never commit
+*.json.key
+credentials*.json
+service_account*.json
+.env
+*.pem
+
+# Large raw data (can be rebuilt with the scripts)
+data/raw/completejourney/*.rda
+data/raw/completejourney/*.rds
+data/raw/completejourney/*.csv
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Review text written by app users: not committed (privacy / store terms).
+# Rebuild with: python src/01_collect_reviews.py
+data/raw/reviews/
+data/processed/reviews_tagged.csv
+data/processed/*_sample_blind.csv
+
+# Large rebuildable files
+data/raw/ga4/
+data/processed/*.parquet
+
+# Slide deck and dashboard (built and hosted outside this repo)
+presentation/
+*.pptx

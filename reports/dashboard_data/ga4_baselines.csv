@@ -1,0 +1,14 @@
+metric,value
+sessions,360129.0
+users,270154.0
+purchasing_sessions,4848.0
+overall_conversion,0.013461842839649126
+cart_abandonment,0.8124835396365552
+checkout_abandonment,0.5637493246893571
+payment_to_purchase,0.7109317681584739
+sessions_with_payment_info,6815.0
+sessions_with_payment_info_per_week,520.2290076335878
+sessions_per_week,27490.763358778626
+aov_usd,68.97067225290421
+purchases_with_zero_revenue_removed,402.0
+purchases_without_add_to_cart_in_session,2000.0

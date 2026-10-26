@@ -1,0 +1,5 @@
+group,households,h1_coupon_share_mean,h1_baskets_median,h1_spend_median,h2_baskets_median,h2_active_week_share_mean,lapsed_rate,h2_to_h1_baskets_ratio_median
+No coupons,1312,0.0,12.5,301.305,14.0,0.431,0.09,1.064
+Light,550,0.042,39.0,1190.585,37.0,0.719,0.013,0.967
+Medium,257,0.113,24.0,830.77,26.0,0.608,0.016,1.038
+Heavy,269,0.297,22.0,886.41,22.0,0.577,0.022,1.081

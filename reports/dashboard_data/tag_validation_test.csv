@@ -1,0 +1,12 @@
+stage,hand_labelled,rule_tagged,correct,precision,recall
+Account & login,23,21,17,0.81,0.74
+Search & browse,8,7,5,0.71,0.62
+Basket / add to cart,2,0,0,,0.0
+Delivery slot booking,2,2,2,1.0,1.0
+Checkout & payment,15,11,11,1.0,0.73
+Substitutions & missing items,6,3,3,1.0,0.5
+Delivery / collection,5,5,1,0.2,0.2
+Refunds & customer service,9,6,5,0.83,0.56
+"App performance (crashes, speed)",32,29,25,0.86,0.78
+"Pricing, promotions & loyalty",32,31,30,0.97,0.94
+ALL STAGES (micro average),134,115,99,0.86,0.74

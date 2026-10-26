@@ -1,0 +1,13 @@
+campaign,outcome,type,start,end,control_group,treated_hh,control_hh,post_weeks,treated_pre_mean,treated_post_mean,control_pre_mean,control_post_mean,did_usd_per_hh_week,se,ci_low,ci_high,p_value,uplift_pct_of_treated_pre,pretrend_wald_p,label
+8,total_spend,Type A,2017-05-08,2017-06-25,not_this_campaign,1076,1391,8,50.68,51.16,16.72,18.59,-1.4,0.92,-3.19,0.4,0.1266,-0.028,0.3088,Campaign 8 · total spend
+8,total_spend,Type A,2017-05-08,2017-06-25,never_targeted,1076,908,8,50.68,51.16,8.52,9.3,-0.31,0.87,-2.02,1.41,0.7263,-0.006,0.4301,Campaign 8 · total spend
+8,coupon_product_spend,Type A,2017-05-08,2017-06-25,not_this_campaign,1076,1391,8,18.69,19.14,6.23,7.09,-0.41,0.39,-1.18,0.35,0.2889,-0.022,0.651,Campaign 8 · coupon-product spend
+8,coupon_product_spend,Type A,2017-05-08,2017-06-25,never_targeted,1076,908,8,18.69,19.14,3.25,3.52,0.17,0.38,-0.57,0.91,0.6531,0.009,0.6401,Campaign 8 · coupon-product spend
+13,total_spend,Type A,2017-08-08,2017-09-24,not_this_campaign,1077,1390,7,51.52,50.72,16.96,16.34,-0.18,0.92,-1.98,1.62,0.8459,-0.003,0.0527,Campaign 13 · total spend
+13,total_spend,Type A,2017-08-08,2017-09-24,never_targeted,1077,908,7,51.52,50.72,10.34,10.86,-1.32,0.93,-3.13,0.5,0.1561,-0.026,0.0028,Campaign 13 · total spend
+13,coupon_product_spend,Type A,2017-08-08,2017-09-24,not_this_campaign,1077,1390,7,27.31,26.64,9.31,8.88,-0.23,0.52,-1.25,0.79,0.6606,-0.008,0.1591,Campaign 13 · coupon-product spend
+13,coupon_product_spend,Type A,2017-08-08,2017-09-24,never_targeted,1077,908,7,27.31,26.64,5.51,5.77,-0.93,0.52,-1.95,0.1,0.076,-0.034,0.0055,Campaign 13 · coupon-product spend
+18,total_spend,Type A,2017-10-30,2017-12-24,not_this_campaign,1133,1334,9,49.86,53.17,16.46,18.82,0.95,0.88,-0.78,2.69,0.2804,0.019,0.9035,Campaign 18 · total spend
+18,total_spend,Type A,2017-10-30,2017-12-24,never_targeted,1133,908,9,49.86,53.17,12.0,14.07,1.23,0.88,-0.49,2.95,0.1606,0.025,0.902,Campaign 18 · total spend
+18,coupon_product_spend,Type A,2017-10-30,2017-12-24,not_this_campaign,1133,1334,9,25.99,26.75,8.77,9.68,-0.14,0.49,-1.1,0.82,0.7736,-0.005,0.6242,Campaign 18 · coupon-product spend
+18,coupon_product_spend,Type A,2017-10-30,2017-12-24,never_targeted,1133,908,9,25.99,26.75,6.35,7.22,-0.1,0.49,-1.06,0.85,0.8314,-0.004,0.4542,Campaign 18 · coupon-product spend

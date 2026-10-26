@@ -1,0 +1,6 @@
+metric,baseline,mde_abs_points,mde_relative,target,n_per_group,n_total,weeks_needed
+payment -> purchase (triggered users),0.7682,2.0,0.026,0.7882,6771,13542,31
+payment -> purchase (triggered users),0.7682,3.0,0.0391,0.7982,2959,5918,14
+payment -> purchase (triggered users),0.7682,4.0,0.0521,0.8082,1635,3270,8
+payment -> purchase (triggered users),0.7682,5.0,0.0651,0.8182,1027,2054,5
+"purchase, ALL users (not triggered) - same +3pt gain diluted",0.0164,0.0639,0.039,0.017,631097,1262194,62

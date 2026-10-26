@@ -1,0 +1,13 @@
+metric,value
+baseline_user_payment_to_purchase,0.7682
+baseline_session_payment_to_purchase,0.7109
+baseline_overall_session_conversion,0.0135
+users_reaching_payment_per_week,437.6
+alpha,0.05
+power,0.8
+mde_abs_points,3.0
+mde_relative,0.0391
+n_per_group,2959.0
+n_total,5918.0
+weeks_at_ga4_traffic,14.0
+planned_weeks,14.0

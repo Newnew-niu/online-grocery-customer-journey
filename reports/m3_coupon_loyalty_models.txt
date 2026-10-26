@@ -1,0 +1,89 @@
+Kruskal-Wallis test, H2 active-week share across 4 groups: H=406.2, p=1e-87
+Spearman correlation (coupon users only), coupon share vs H2 active-week share: rho=-0.296, p=3.2e-23
+
+Effect of +10 percentage points in H1 coupon basket share, controlling for H1 baskets and spend:
+  log(1 + H2 baskets) [OLS]: coef=0.0333 [95% CI 0.0092, 0.0575], p=0.00688
+  H2 active-week share [OLS]: coef=0.0143 [95% CI 0.0068, 0.0217], p=0.000173
+  lapsed (log-odds) [logit]: coef=-0.2508 [95% CI -0.5002, -0.0014], p=0.0487
+  -> odds ratio for lapsing per +10 pts: 0.778
+
+Groups vs 'No coupons' (H2 active-week share, same controls):
+  Light: +0.0273 [+0.0060, +0.0487], p=0.0122
+  Medium: +0.0275 [+0.0028, +0.0522], p=0.029
+  Heavy: +0.0383 [+0.0130, +0.0636], p=0.00297
+
+N = 2388 households. Robust (HC1) standard errors for OLS.
+
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:         log_h2_baskets   R-squared:                       0.621
+Model:                            OLS   Adj. R-squared:                  0.621
+Method:                 Least Squares   F-statistic:                     934.2
+Date:                Mon, 26 Oct 2026   Prob (F-statistic):               0.00
+Time:                        13:45:36   Log-Likelihood:                -2298.0
+No. Observations:                2388   AIC:                             4604.
+Df Residuals:                    2384   BIC:                             4627.
+Df Model:                           3                                         
+Covariance Type:                  HC1                                         
+=====================================================================================
+                        coef    std err          z      P>|z|      [0.025      0.975]
+-------------------------------------------------------------------------------------
+Intercept             0.7352      0.083      8.886      0.000       0.573       0.897
+coupon_share_10pt     0.0333      0.012      2.703      0.007       0.009       0.057
+log_h1_baskets        0.7001      0.025     27.717      0.000       0.651       0.750
+log_h1_spend          0.0343      0.021      1.647      0.100      -0.007       0.075
+==============================================================================
+Omnibus:                      343.890   Durbin-Watson:                   1.981
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              940.189
+Skew:                          -0.773   Prob(JB):                    6.93e-205
+Kurtosis:                       5.657   Cond. No.                         39.8
+==============================================================================
+
+Notes:
+[1] Standard Errors are heteroscedasticity robust (HC1)
+
+                             OLS Regression Results                             
+================================================================================
+Dep. Variable:     h2_active_week_share   R-squared:                       0.595
+Model:                              OLS   Adj. R-squared:                  0.594
+Method:                   Least Squares   F-statistic:                     1233.
+Date:                  Mon, 26 Oct 2026   Prob (F-statistic):               0.00
+Time:                          13:45:36   Log-Likelihood:                 632.15
+No. Observations:                  2388   AIC:                            -1256.
+Df Residuals:                      2384   BIC:                            -1233.
+Df Model:                             3                                         
+Covariance Type:                    HC1                                         
+=====================================================================================
+                        coef    std err          z      P>|z|      [0.025      0.975]
+-------------------------------------------------------------------------------------
+Intercept            -0.1410      0.020     -6.939      0.000      -0.181      -0.101
+coupon_share_10pt     0.0143      0.004      3.756      0.000       0.007       0.022
+log_h1_baskets        0.1738      0.007     26.262      0.000       0.161       0.187
+log_h1_spend          0.0276      0.006      5.006      0.000       0.017       0.038
+==============================================================================
+Omnibus:                       31.946   Durbin-Watson:                   2.003
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):               32.896
+Skew:                          -0.285   Prob(JB):                     7.19e-08
+Kurtosis:                       3.076   Cond. No.                         39.8
+==============================================================================
+
+Notes:
+[1] Standard Errors are heteroscedasticity robust (HC1)
+
+                           Logit Regression Results                           
+==============================================================================
+Dep. Variable:                 lapsed   No. Observations:                 2388
+Model:                          Logit   Df Residuals:                     2384
+Method:                           MLE   Df Model:                            3
+Date:                Mon, 26 Oct 2026   Pseudo R-squ.:                  0.1945
+Time:                        13:45:36   Log-Likelihood:                -418.05
+converged:                       True   LL-Null:                       -518.96
+Covariance Type:            nonrobust   LLR p-value:                 1.703e-43
+=====================================================================================
+                        coef    std err          z      P>|z|      [0.025      0.975]
+-------------------------------------------------------------------------------------
+Intercept             0.1537      0.386      0.398      0.690      -0.602       0.910
+coupon_share_10pt    -0.2508      0.127     -1.971      0.049      -0.500      -0.001
+log_h1_baskets       -0.8619      0.163     -5.301      0.000      -1.181      -0.543
+log_h1_spend         -0.1688      0.123     -1.367      0.171      -0.411       0.073
+=====================================================================================
