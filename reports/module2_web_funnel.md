@@ -36,7 +36,7 @@
 | Metric | Value |
 |---|---|
 | Overall session conversion | **1.35%** (4,848 / 360,129) |
-| Cart abandonment | **81.3%** |
+| Cart abandonment | **81.2%** |
 | Checkout abandonment (began checkout, no purchase) | 56.4% |
 | Payment info -> purchase | **71.1%** (so 28.9% drop at the last step) |
 | AOV | **$68.97** |
