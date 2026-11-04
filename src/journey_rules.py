@@ -6,9 +6,9 @@ Each rule is a list of regular expressions. We match on lower-case text
 
 How the rules were built:
 - Version 1 was written after reading a sample of negative reviews.
-- It was checked on 100 hand-labelled reviews (the "development" sample).
+- It was checked on 100 AI-labelled reviews (the "development" sample).
 - The mistakes were used to write this version 2.
-- Version 2 is scored on a NEW sample of 100 hand-labelled reviews
+- Version 2 is scored on a NEW sample of 100 AI-labelled reviews
   (the "test" sample) that was not used to write the rules.
 """
 import re

@@ -24,11 +24,12 @@
 
 1. **Clean:** remove empty reviews, join title + text, check language. (All 2,091 were English. The language detector is weak on short texts, so we only trust it on 5+ word reviews.)
 2. **Tag journey stages with keyword rules** (`src/journey_rules.py`). One review can have several stages.
-3. **Check the rules by hand:**
-   - Dev sample: 100 random negative reviews, labelled by hand, used to improve the rules.
-   - Test sample: a new set of 100 random negative reviews, labelled by hand, **not** used to write the rules.
+3. **Check the rules against labels:**
+   - Dev sample: 100 random negative reviews, labelled by an AI assistant, used to improve the rules.
+   - Test sample: a new set of 100 random negative reviews, labelled by an AI assistant, **not** used to write the rules.
    - On the test sample: **precision 0.86, recall 0.74** (all stages together). See `reports/tag_validation.csv`.
-   - Stage shares from the rules and from the hand labels are very close on the 200 hand-labelled reviews (`reports/pain_point_hand_vs_rules.csv`), so the ranking is stable.
+   - Stage shares from the rules and from the AI-made labels are very close on the 200 labelled reviews (`reports/pain_point_hand_vs_rules.csv`), so the ranking is stable.
+   - Later check (Module 5): a person blind-labelled 30 of the test reviews. Agreement with the AI-made labels was kappa 0.67, and on those 30 the rules score precision 0.68, recall 0.74 (`llm_upgrade/reports/label_recheck_agreement.json`, `llm_upgrade/reports/llm_vs_rules.csv`).
 4. **Sentiment:** star rating plus a VADER score. They agree well (correlation 0.71).
 5. **What the rules miss:** 19.5% of negative reviews get no tag. A topic model (LDA) and word counts show these are mostly short, general reviews ("awful app") plus small themes (store staff, digital receipts, notifications). No big missed theme.
 
@@ -59,7 +60,7 @@ Share of the 609 negative reviews that mention each stage (all three retailers):
 - **Dunnes Stores:** pricing, vouchers and loyalty are in 51% of negative reviews (voucher value, short expiry dates). This is mostly a commercial policy issue, not a UX bug.
 - **Tesco:** app performance (35%), pricing/loyalty (30%) and account & login (26%). Many login complaints are about being logged out, or having to re-verify the Clubcard, while standing at the till.
 
-**Delivery is not the main pain point in app reviews.** Reviews that mention delivery have a high average rating (4.25), so many of them are praise. (The delivery rule is also the weakest rule: few hand-labelled cases, so treat this stage with care.)
+**Delivery is not the main pain point in app reviews.** Reviews that mention delivery have a high average rating (4.25), so many of them are praise. (The delivery rule is also the weakest rule: few labelled cases, so treat this stage with care.)
 
 ## Top 3 pain points as testable hypotheses
 

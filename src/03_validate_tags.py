@@ -1,11 +1,12 @@
-"""Step 3: Check the keyword rules against hand labels.
+"""Step 3: Check the keyword rules against AI-made labels.
 
 We used two random samples of 100 negative reviews (rating 1-2):
 - "dev" sample (seed 42): used to find rule mistakes and improve the rules.
 - "test" sample (seed 2026, no overlap with dev): NOT used to write rules.
   The test scores are the honest ones to report.
 
-Each review was read and labelled by hand without looking at the rule tags.
+Each review was labelled by an AI assistant from a file without the rule tags.
+The file names say "manual", but the labels were not made by a person.
 Labels: data/processed/{dev,test}_labels_manual.csv
 Codes: AL account/login, SB search/browse, BA basket, SL delivery slot,
 CP checkout/payment, SM substitutions/missing items, DC delivery/collection,

@@ -7,8 +7,8 @@ retailers have few reviews (SuperValu: 143 negative reviews).
 
 Second measure: average star rating of ALL reviews that mention the stage.
 
-Check: we compare rule-based shares with hand-label shares on the 200
-hand-labelled negative reviews, to see if the ranking is the same.
+Check: we compare rule-based shares with AI-made label shares on the 200
+labelled negative reviews, to see if the ranking is the same.
 
 Outputs:
 - reports/pain_point_ranking.csv
@@ -73,7 +73,7 @@ def main():
     print("\nAverage rating per retailer:", df.groupby("retailer")["rating"].mean().round(2).to_dict())
     print("Share negative per retailer:", (df.assign(neg=df.rating <= 2).groupby("retailer")["neg"].mean().round(3)).to_dict())
 
-    # ---- check ranking against hand labels (200 reviews) ----
+    # ---- check ranking against AI-made labels (200 reviews) ----
     codes = {"AL": "account_login", "SB": "search_browse", "BA": "basket_add_to_cart",
              "SL": "delivery_slot_booking", "CP": "checkout_payment", "SM": "substitutions_missing_items",
              "DC": "delivery_collection", "RS": "refunds_customer_service", "AP": "app_performance",
@@ -90,7 +90,7 @@ def main():
         "hand_label_share": [hand["manual_labels"].str.split(";").map(lambda x, c=c: c in x).mean() for c in codes],
         "rule_share": [rules[v].mean() for v in codes.values()],
     }).sort_values("hand_label_share", ascending=False)
-    print("\nRanking check on 200 hand-labelled negative reviews:\n", check.round(3).to_string(index=False))
+    print("\nRanking check on 200 AI-labelled negative reviews:\n", check.round(3).to_string(index=False))
     check.round(3).to_csv(ROOT / "reports/pain_point_hand_vs_rules.csv", index=False)
 
     # ---- chart 1: share of negative reviews by stage and retailer ----
