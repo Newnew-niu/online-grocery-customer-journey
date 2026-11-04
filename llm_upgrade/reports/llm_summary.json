@@ -1,0 +1,53 @@
+{
+  "api_spend": {
+    "dev_prompt_work_usd": 0.1305435,
+    "test_usd": 0.027260799999999998,
+    "full_run_new_calls_usd": 0.4006593,
+    "total_usd": 0.5584636000000001,
+    "full_run_reviews": 2091,
+    "full_run_failures": 0,
+    "full_run_retries": 2,
+    "full_run_valid_quote_rate": 1.0,
+    "full_run_tokens": 3643338
+  },
+  "f1_difference": {
+    "ai_labels": {
+      "llm_minus_rules": 0.05424012652928312,
+      "hybrid_minus_rules": 0.06297530547722807
+    },
+    "person_labels": {
+      "llm_minus_rules": -0.060633484162895934,
+      "hybrid_minus_rules": -0.06769230769230772
+    }
+  },
+  "disagreements_closer_to_ai_labels": {
+    "llm": 23,
+    "rules": 14,
+    "tie": 4
+  },
+  "person_labels_without_RS": {
+    "llm": {
+      "tp": 22,
+      "fp": 9,
+      "fn": 9,
+      "precision": 0.7096774193548387,
+      "recall": 0.7096774193548387,
+      "f1": 0.7096774193548387
+    },
+    "rules": {
+      "tp": 23,
+      "fp": 9,
+      "fn": 8,
+      "precision": 0.71875,
+      "recall": 0.7419354838709677,
+      "f1": 0.7301587301587301
+    }
+  },
+  "person_RS_labels_in_30": 0,
+  "pain_point_rank_spearman": {
+    "All three": 0.9848069807617047,
+    "Dunnes Stores": 0.9665698144513026,
+    "SuperValu": 0.9447852760736197,
+    "Tesco": 0.9726488698881034
+  }
+}

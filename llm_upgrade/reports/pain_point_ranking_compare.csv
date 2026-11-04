@@ -1,0 +1,41 @@
+retailer,stage,share_of_negative_rules,rank_in_retailer_rules,share_of_negative_llm,rank_in_retailer_llm,share_change
+All three,"App performance (crashes, speed)",0.34,1,0.314,1,-0.026
+All three,"Pricing, promotions & loyalty",0.32,2,0.289,2,-0.031
+All three,Account & login,0.176,3,0.179,3,0.003
+All three,Checkout & payment,0.112,4,0.122,4,0.01
+All three,Search & browse,0.102,5,0.122,4,0.02
+All three,Refunds & customer service,0.069,6,0.082,6,0.013
+All three,Substitutions & missing items,0.049,7,0.067,7,0.018
+All three,Delivery / collection,0.034,8,0.044,8,0.01
+All three,Basket / add to cart,0.01,10,0.023,9,0.013
+All three,Delivery slot booking,0.013,9,0.018,10,0.005
+Dunnes Stores,"Pricing, promotions & loyalty",0.509,1,0.476,1,-0.033
+Dunnes Stores,Account & login,0.146,2,0.137,2,-0.009
+Dunnes Stores,"App performance (crashes, speed)",0.118,3,0.108,3,-0.01
+Dunnes Stores,Refunds & customer service,0.08,4,0.099,4,0.019
+Dunnes Stores,Search & browse,0.052,5,0.075,5,0.023
+Dunnes Stores,Checkout & payment,0.028,7,0.066,6,0.038
+Dunnes Stores,Substitutions & missing items,0.033,6,0.052,7,0.019
+Dunnes Stores,Delivery / collection,0.028,7,0.028,8,0.0
+Dunnes Stores,Delivery slot booking,0.005,10,0.014,9,0.009
+Dunnes Stores,Basket / add to cart,0.009,9,0.009,10,0.0
+SuperValu,"App performance (crashes, speed)",0.65,1,0.65,1,0.0
+SuperValu,Checkout & payment,0.196,3,0.203,2,0.007
+SuperValu,Search & browse,0.203,2,0.196,3,-0.007
+SuperValu,"Pricing, promotions & loyalty",0.07,4,0.07,4,0.0
+SuperValu,Account & login,0.07,4,0.056,5,-0.014
+SuperValu,Refunds & customer service,0.042,6,0.042,6,0.0
+SuperValu,Substitutions & missing items,0.028,7,0.042,6,0.014
+SuperValu,Basket / add to cart,0.007,10,0.035,8,0.028
+SuperValu,Delivery slot booking,0.014,8,0.014,9,0.0
+SuperValu,Delivery / collection,0.014,8,0.014,9,0.0
+Tesco,"App performance (crashes, speed)",0.35,1,0.295,1,-0.055
+Tesco,Account & login,0.26,3,0.283,2,0.023
+Tesco,"Pricing, promotions & loyalty",0.303,2,0.256,3,-0.047
+Tesco,Checkout & payment,0.134,4,0.122,4,-0.012
+Tesco,Search & browse,0.087,5,0.118,5,0.031
+Tesco,Substitutions & missing items,0.075,6,0.094,6,0.019
+Tesco,Refunds & customer service,0.075,6,0.091,7,0.016
+Tesco,Delivery / collection,0.051,8,0.075,8,0.024
+Tesco,Basket / add to cart,0.012,10,0.028,9,0.016
+Tesco,Delivery slot booking,0.02,9,0.024,10,0.004

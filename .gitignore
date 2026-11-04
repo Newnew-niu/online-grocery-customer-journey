@@ -35,3 +35,6 @@ data/processed/*.parquet
 # Hosted copies of the deck and dashboard (the repo keeps slides/ and docs/ instead)
 presentation/
 
+
+# LLM upgrade: caches, vector store and any table with review text
+llm_upgrade/data/

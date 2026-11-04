@@ -1,0 +1,18 @@
+{
+  "sample": "dev",
+  "prompt": "journey_stage_v2__rerun",
+  "model": "claude-haiku-5-5",
+  "effort": "low",
+  "date": "2026-11-04",
+  "reviews": 100,
+  "failures": 0,
+  "retries": 0,
+  "evidence_quotes": 121,
+  "valid_quotes": 121,
+  "valid_quote_rate": 1.0,
+  "input_tokens": 164959,
+  "output_tokens": 20577,
+  "cost_usd": 0.0267844,
+  "avg_latency_s": 1.732449577001389,
+  "same_labels_as_first_run": 0.88
+}

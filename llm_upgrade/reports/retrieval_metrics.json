@@ -1,0 +1,22 @@
+{
+  "queries": 10,
+  "corpus": 200,
+  "relevance": "AI-made labels",
+  "embed_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "p5": {
+    "semantic": 0.74,
+    "bm25": 0.66,
+    "ceiling": 0.96,
+    "semantic_wins": 4,
+    "ties": 4,
+    "bm25_wins": 2
+  },
+  "p10": {
+    "semantic": 0.64,
+    "bm25": 0.52,
+    "ceiling": 0.9,
+    "semantic_wins": 7,
+    "ties": 1,
+    "bm25_wins": 2
+  }
+}

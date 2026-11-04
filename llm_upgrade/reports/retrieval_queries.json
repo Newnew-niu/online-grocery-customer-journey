@@ -1,0 +1,16 @@
+{
+  "written_before_results": true,
+  "note": "One natural-language query per stage, written before any search result was seen. Do not edit after running the retrieval evaluation.",
+  "queries": {
+    "AL": "the app keeps logging me out and I can't sign in",
+    "SB": "it is hard to find products, the search and menus are confusing",
+    "BA": "items will not add to my basket or disappear from it",
+    "SL": "no delivery slots are available when I try to book",
+    "CP": "my payment fails at checkout and the order won't go through",
+    "SM": "my order had missing items or bad substitutions",
+    "DC": "the delivery came late and the driver left it in the wrong place",
+    "RS": "I can't get a refund and customer service never replies",
+    "AP": "the app is very slow, freezes and crashes",
+    "PL": "my vouchers and loyalty points don't work and prices are too high"
+  }
+}

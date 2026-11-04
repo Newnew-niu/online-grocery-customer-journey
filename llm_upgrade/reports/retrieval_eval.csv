@@ -1,0 +1,11 @@
+stage,query,relevant_reviews,semantic_p5,bm25_p5,ceiling_p5,semantic_p10,bm25_p10,ceiling_p10
+AL,the app keeps logging me out and I can't sign in,34,1.0,1.0,1.0,1.0,0.7,1.0
+SB,"it is hard to find products, the search and menus are confusing",19,0.8,0.6,1.0,0.8,0.5,1.0
+BA,items will not add to my basket or disappear from it,7,0.4,0.2,1.0,0.3,0.2,0.7
+SL,no delivery slots are available when I try to book,3,0.2,0.2,0.6,0.1,0.1,0.3
+CP,my payment fails at checkout and the order won't go through,27,0.8,1.0,1.0,0.9,0.6,1.0
+SM,my order had missing items or bad substitutions,14,0.4,0.6,1.0,0.4,0.3,1.0
+DC,the delivery came late and the driver left it in the wrong place,10,1.0,0.4,1.0,0.5,0.2,1.0
+RS,I can't get a refund and customer service never replies,21,0.8,0.8,1.0,0.5,0.7,1.0
+AP,"the app is very slow, freezes and crashes",61,1.0,1.0,1.0,0.9,1.0,1.0
+PL,my vouchers and loyalty points don't work and prices are too high,67,1.0,0.8,1.0,1.0,0.9,1.0

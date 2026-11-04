@@ -1,0 +1,41 @@
+retailer,stage,negative_reviews,negative_mentioning,share_of_negative,ci_low,ci_high,avg_rating_when_mentioned,reviews_mentioning_any_rating,rank_in_retailer
+All three,"App performance (crashes, speed)",609,191,0.314,0.278,0.352,1.78,250,1
+All three,"Pricing, promotions & loyalty",609,176,0.289,0.254,0.326,2.09,264,2
+All three,Account & login,609,109,0.179,0.151,0.211,1.71,137,3
+All three,Search & browse,609,74,0.122,0.098,0.15,2.49,138,4
+All three,Checkout & payment,609,74,0.122,0.098,0.15,1.84,103,4
+All three,Refunds & customer service,609,50,0.082,0.063,0.107,1.47,58,6
+All three,Substitutions & missing items,609,41,0.067,0.05,0.09,2.85,100,7
+All three,Delivery / collection,609,27,0.044,0.031,0.064,2.02,40,8
+All three,Basket / add to cart,609,14,0.023,0.014,0.038,2.61,28,9
+All three,Delivery slot booking,609,11,0.018,0.01,0.032,2.55,20,10
+Dunnes Stores,"Pricing, promotions & loyalty",212,101,0.476,0.41,0.543,2.22,160,1
+Dunnes Stores,Account & login,212,29,0.137,0.097,0.19,2.1,42,2
+Dunnes Stores,"App performance (crashes, speed)",212,23,0.108,0.073,0.158,2.4,40,3
+Dunnes Stores,Refunds & customer service,212,21,0.099,0.066,0.147,1.65,26,4
+Dunnes Stores,Search & browse,212,16,0.075,0.047,0.119,2.58,31,5
+Dunnes Stores,Checkout & payment,212,14,0.066,0.04,0.108,1.81,21,6
+Dunnes Stores,Substitutions & missing items,212,11,0.052,0.029,0.091,2.57,23,7
+Dunnes Stores,Delivery / collection,212,6,0.028,0.013,0.06,2.1,10,8
+Dunnes Stores,Delivery slot booking,212,3,0.014,0.005,0.041,2.6,5,9
+Dunnes Stores,Basket / add to cart,212,2,0.009,0.003,0.034,1.67,3,10
+SuperValu,"App performance (crashes, speed)",143,93,0.65,0.569,0.724,1.6,114,1
+SuperValu,Checkout & payment,143,29,0.203,0.145,0.276,1.78,37,2
+SuperValu,Search & browse,143,28,0.196,0.139,0.268,2.19,42,3
+SuperValu,"Pricing, promotions & loyalty",143,10,0.07,0.038,0.124,1.67,12,4
+SuperValu,Account & login,143,8,0.056,0.029,0.107,1.4,10,5
+SuperValu,Substitutions & missing items,143,6,0.042,0.019,0.089,1.86,7,6
+SuperValu,Refunds & customer service,143,6,0.042,0.019,0.089,1.29,7,6
+SuperValu,Basket / add to cart,143,5,0.035,0.015,0.079,1.2,5,8
+SuperValu,Delivery slot booking,143,2,0.014,0.004,0.05,2.0,3,9
+SuperValu,Delivery / collection,143,2,0.014,0.004,0.05,1.5,2,9
+Tesco,"App performance (crashes, speed)",254,75,0.295,0.243,0.354,1.73,96,1
+Tesco,Account & login,254,72,0.283,0.232,0.342,1.55,85,2
+Tesco,"Pricing, promotions & loyalty",254,65,0.256,0.206,0.313,1.92,92,3
+Tesco,Checkout & payment,254,31,0.122,0.087,0.168,1.91,45,4
+Tesco,Search & browse,254,30,0.118,0.084,0.164,2.65,65,5
+Tesco,Substitutions & missing items,254,24,0.094,0.064,0.137,3.04,70,6
+Tesco,Refunds & customer service,254,23,0.091,0.061,0.132,1.32,25,7
+Tesco,Delivery / collection,254,19,0.075,0.048,0.114,2.04,28,8
+Tesco,Basket / add to cart,254,7,0.028,0.013,0.056,3.1,20,9
+Tesco,Delivery slot booking,254,6,0.024,0.011,0.051,2.67,12,10

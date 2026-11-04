@@ -1,0 +1,22 @@
+{
+  "frozen_prompt": "journey_stage_v2",
+  "prompt_file_sha256": "cd3d7cb98ddd8f61d6336c6b4cd19c592f2f458399cab5851683b6012b08f63d",
+  "frozen_on": "2026-11-04",
+  "frozen_before_any_test_run": true,
+  "reason": "v2 and v3 could not be separated on dev because repeat runs differ as much as the two prompts do. v2 is simpler, repeated more of its labels and had exact quotes in both runs.",
+  "same_labels_on_rerun": {
+    "journey_stage_v2": 0.88,
+    "journey_stage_v3": 0.85
+  },
+  "valid_quote_rate": {
+    "journey_stage_v2": [
+      1.0,
+      1.0
+    ],
+    "journey_stage_v3": [
+      0.9848484848484849,
+      0.9918032786885246
+    ]
+  },
+  "dev_llm_cost_usd": 0.1305435
+}
