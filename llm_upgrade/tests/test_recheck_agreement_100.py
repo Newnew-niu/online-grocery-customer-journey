@@ -43,6 +43,17 @@ def test_bad_sheets_stop(rows, ids):
         m.check_sheet(sheet(rows), ids)
 
 
+@pytest.mark.parametrize("enc", ["utf-8-sig", "gbk", "cp1252"])
+def test_read_sheet_accepts_excel_encodings(tmp_path, enc):
+    text = "café ’quote’" if enc == "cp1252" else "备注" if enc == "gbk" else "备注 café"
+    path = tmp_path / "sheet.csv"
+    pd.DataFrame({"val_id": [1], "full_text": [text], "my_labels": ["AP"]}).to_csv(
+        path, index=False, encoding=enc)
+    df = m.read_sheet(path)
+    assert df.loc[0, "my_labels"] == "AP"
+    assert df.loc[0, "full_text"] == text
+
+
 def test_missing_label_column_stops():
     with pytest.raises(SystemExit):
         m.check_sheet(pd.DataFrame({"val_id": ["1"]}), [1])

@@ -36,10 +36,18 @@ FIRST = REPORTS / "test_recheck_labels.csv"
 
 
 def read_sheet(path):
-    try:
-        return pd.read_csv(path, encoding="utf-8-sig", dtype=str, keep_default_na=False)
-    except UnicodeDecodeError:
-        raise SystemExit(f"{path} is not UTF-8. In Excel use Save As > 'CSV UTF-8'.")
+    """Read UTF-8 first. Excel's plain "CSV" uses a Windows code page instead: GBK on
+    Chinese Windows, or Windows-1252. Labels are ASCII codes, so they read the same in
+    any of these. Review text is not used here."""
+    for enc in ("utf-8-sig", "gbk", "cp1252"):
+        try:
+            df = pd.read_csv(path, encoding=enc, dtype=str, keep_default_na=False)
+        except UnicodeDecodeError:
+            continue
+        if enc != "utf-8-sig":
+            print(f"Warning: {path.name} is not UTF-8; read as {enc}. Check any notes look right.")
+        return df
+    raise SystemExit(f"Cannot read {path}. In Excel use Save As > 'CSV UTF-8'.")
 
 
 def parse_labels(cell):

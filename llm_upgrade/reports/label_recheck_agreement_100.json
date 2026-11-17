@@ -1,0 +1,304 @@
+{
+  "note": "first30 were labelled before the test run; rest70 after the test results were published. Notes are not used for scoring.",
+  "all100": {
+    "reviews": 100,
+    "cells": 1000,
+    "kappa": 0.6513782498233016,
+    "kappa_ci95": [
+      0.575193672673545,
+      0.7255657197881556
+    ],
+    "same_full_label_set": 0.52,
+    "reviews_with_no_stage": {
+      "person": 15,
+      "ai": 15
+    },
+    "labels_given": {
+      "person": 103,
+      "ai": 134
+    },
+    "per_stage_treating_person_as_truth": {
+      "AL": {
+        "tp": 17,
+        "fp": 6,
+        "fn": 2,
+        "precision": 0.7391304347826086,
+        "recall": 0.8947368421052632,
+        "f1": 0.8095238095238095
+      },
+      "SB": {
+        "tp": 7,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.875,
+        "recall": 1.0,
+        "f1": 0.9333333333333333
+      },
+      "BA": {
+        "tp": 1,
+        "fp": 1,
+        "fn": 1,
+        "precision": 0.5,
+        "recall": 0.5,
+        "f1": 0.5
+      },
+      "SL": {
+        "tp": 0,
+        "fp": 2,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "CP": {
+        "tp": 7,
+        "fp": 8,
+        "fn": 4,
+        "precision": 0.4666666666666667,
+        "recall": 0.6363636363636364,
+        "f1": 0.5384615384615384
+      },
+      "SM": {
+        "tp": 3,
+        "fp": 3,
+        "fn": 0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6666666666666666
+      },
+      "DC": {
+        "tp": 3,
+        "fp": 2,
+        "fn": 2,
+        "precision": 0.6,
+        "recall": 0.6,
+        "f1": 0.6
+      },
+      "RS": {
+        "tp": 4,
+        "fp": 5,
+        "fn": 2,
+        "precision": 0.4444444444444444,
+        "recall": 0.6666666666666666,
+        "f1": 0.5333333333333333
+      },
+      "AP": {
+        "tp": 19,
+        "fp": 13,
+        "fn": 7,
+        "precision": 0.59375,
+        "recall": 0.7307692307692307,
+        "f1": 0.6551724137931034
+      },
+      "PL": {
+        "tp": 21,
+        "fp": 11,
+        "fn": 2,
+        "precision": 0.65625,
+        "recall": 0.9130434782608695,
+        "f1": 0.7636363636363637
+      }
+    }
+  },
+  "first30": {
+    "reviews": 30,
+    "cells": 300,
+    "kappa": 0.6722631094756207,
+    "kappa_ci95": [
+      0.49784022265872746,
+      0.8251748251748252
+    ],
+    "same_full_label_set": 0.6333333333333333,
+    "reviews_with_no_stage": {
+      "person": 7,
+      "ai": 6
+    },
+    "labels_given": {
+      "person": 31,
+      "ai": 34
+    },
+    "per_stage_treating_person_as_truth": {
+      "AL": {
+        "tp": 4,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.8,
+        "recall": 1.0,
+        "f1": 0.8888888888888888
+      },
+      "SB": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "BA": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": null,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "SL": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      },
+      "CP": {
+        "tp": 1,
+        "fp": 3,
+        "fn": 0,
+        "precision": 0.25,
+        "recall": 1.0,
+        "f1": 0.4
+      },
+      "SM": {
+        "tp": 2,
+        "fp": 2,
+        "fn": 0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6666666666666666
+      },
+      "DC": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "precision": null,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "RS": {
+        "tp": 0,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": null,
+        "f1": 0.0
+      },
+      "AP": {
+        "tp": 7,
+        "fp": 1,
+        "fn": 4,
+        "precision": 0.875,
+        "recall": 0.6363636363636364,
+        "f1": 0.7368421052631579
+      },
+      "PL": {
+        "tp": 8,
+        "fp": 0,
+        "fn": 1,
+        "precision": 1.0,
+        "recall": 0.8888888888888888,
+        "f1": 0.9411764705882353
+      }
+    }
+  },
+  "rest70": {
+    "reviews": 70,
+    "cells": 700,
+    "kappa": 0.6433962264150942,
+    "kappa_ci95": [
+      0.5588446248745698,
+      0.7263232287369807
+    ],
+    "same_full_label_set": 0.4714285714285714,
+    "reviews_with_no_stage": {
+      "person": 8,
+      "ai": 9
+    },
+    "labels_given": {
+      "person": 72,
+      "ai": 100
+    },
+    "per_stage_treating_person_as_truth": {
+      "AL": {
+        "tp": 13,
+        "fp": 5,
+        "fn": 2,
+        "precision": 0.7222222222222222,
+        "recall": 0.8666666666666667,
+        "f1": 0.7878787878787878
+      },
+      "SB": {
+        "tp": 6,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.8571428571428571,
+        "recall": 1.0,
+        "f1": 0.9230769230769231
+      },
+      "BA": {
+        "tp": 1,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6666666666666666
+      },
+      "SL": {
+        "tp": 0,
+        "fp": 2,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "CP": {
+        "tp": 6,
+        "fp": 5,
+        "fn": 4,
+        "precision": 0.5454545454545454,
+        "recall": 0.6,
+        "f1": 0.5714285714285714
+      },
+      "SM": {
+        "tp": 1,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6666666666666666
+      },
+      "DC": {
+        "tp": 3,
+        "fp": 2,
+        "fn": 0,
+        "precision": 0.6,
+        "recall": 1.0,
+        "f1": 0.75
+      },
+      "RS": {
+        "tp": 4,
+        "fp": 1,
+        "fn": 2,
+        "precision": 0.8,
+        "recall": 0.6666666666666666,
+        "f1": 0.7272727272727273
+      },
+      "AP": {
+        "tp": 12,
+        "fp": 12,
+        "fn": 3,
+        "precision": 0.5,
+        "recall": 0.8,
+        "f1": 0.6153846153846154
+      },
+      "PL": {
+        "tp": 13,
+        "fp": 11,
+        "fn": 1,
+        "precision": 0.5416666666666666,
+        "recall": 0.9285714285714286,
+        "f1": 0.6842105263157895
+      }
+    }
+  },
+  "reviews_with_notes": 0
+}

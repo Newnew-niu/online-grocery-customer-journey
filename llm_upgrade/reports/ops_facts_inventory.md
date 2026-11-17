@@ -3,23 +3,31 @@
 This file lists the facts that already exist in the repo. Each number has its source next to it.
 Paths are relative to `llm_upgrade/` unless they start with `../`.
 "NOT AVAILABLE" means no file in the repo holds the number.
-Nothing was rerun, and no API calls were made, to write this file.
+No API calls were made to write this file. Section 1 was updated on 2026-11-17 after the person labelled the other 70 test reviews.
 
 ## 1. Human-verified set and agreement
 
-| Fact | Value | Source |
-|---|---|---|
-| Reviews blind-labelled by a person | 30 (all from the 100 test reviews) | `reports/label_recheck_agreement.json` (`reviews`) |
-| Review x stage cells compared | 300 | `reports/label_recheck_agreement.json` (`cells`) |
-| Cohen's kappa, person vs AI-made labels | 0.67 (95% CI 0.50-0.83) | `reports/label_recheck_agreement.json` (`kappa`, `kappa_ci95`) |
-| Same full label set on a review | 63% (19 of 30) | `reports/label_recheck_agreement.json` (`same_full_label_set` = 0.633) |
-| Labels given | person 31, AI 34 | `reports/label_recheck_agreement.json` (`labels_given`) |
-| Reviews with no stage | person 7, AI 6 | `reports/label_recheck_agreement.json` (`reviews_with_no_stage`) |
-| Person's labels per review | `reports/test_recheck_labels.csv` | 30 rows, no review text |
+A person blind-labelled all 100 test reviews in two rounds. They saw no AI labels, rule tags or LLM tags.
+- `first30`: 30 random test reviews, labelled before the test run (`src/00_make_blind_worksheet.py`).
+- `rest70`: the other 70, labelled on 2026-11-17, after the test results were published (`src/00c_make_blind_worksheet_rest.py`). The person may have seen some of these reviews while working on the project. They did not open the files with AI or LLM labels while labelling.
 
-**Pending:** the person is blind-labelling the other 70 test reviews (worksheet made by `src/00c_make_blind_worksheet_rest.py`). This section will be updated when they are back. The first 30 were labelled before the test run. The 70 are labelled after the test results were published, so they will be reported separately as well as together.
+Source for every row below: `reports/label_recheck_agreement_100.json` (made by `src/00d_recheck_agreement_100.py`). Labels per review: `reports/test_recheck_labels_100.csv` (no review text).
 
-Kappa between the person and each vendor (rules, LLM) is NOT AVAILABLE yet. Phase 1 can compute it from files already in the repo.
+| Fact | all 100 | first 30 | other 70 |
+|---|---|---|---|
+| Review x stage cells compared | 1,000 | 300 | 700 |
+| Cohen's kappa, person vs AI-made labels | 0.65 (95% CI 0.58-0.73) | 0.67 (0.50-0.83) | 0.64 (0.56-0.73) |
+| Same full label set on a review | 52% (52 of 100) | 63% (19 of 30) | 47% (33 of 70) |
+| Labels given, person / AI | 103 / 134 | 31 / 34 | 72 / 100 |
+| Reviews with no stage, person / AI | 15 / 15 | 7 / 6 | 8 / 9 |
+
+- The first-30 numbers are the same as the original check in `reports/label_recheck_agreement.json`. That file is unchanged.
+- The person gives fewer labels than the AI labels: 103 vs 134. The biggest gaps are PL (person 23, AI 32), CP (11 vs 15), AP (26 vs 32) and SM (3 vs 6).
+- In the first 30 the person gave RS to no review. Over all 100 they gave it to 6.
+- The worksheet for the 70 has no `notes` column, so no edge-case notes were recorded.
+- The worksheet was saved as Windows-1252, not UTF-8. Labels are ASCII codes, so this does not change them.
+
+Kappa between the person and each vendor (rules, LLM) is NOT AVAILABLE yet. Phase 1 will compute it on the 100.
 
 ## 2. Journey-stage categories
 
@@ -64,6 +72,8 @@ Dev scores by prompt (AI-made labels, n=100). Source: `reports/llm_prompt_iterat
 | v3 | 0.91 | 0.93 | 0.92 | 0.91 | 98.5% |
 
 ## 4. LLM vs rules on the test sample
+
+The person-label rows below are the published results on the first 30 only. Phase 1 rescores both vendors on all 100.
 
 Source for all rows: `reports/llm_eval_metrics.json` (micro and macro) and `reports/llm_vs_rules.csv` (per stage).
 
@@ -134,8 +144,8 @@ The check shows that the quote exists. It does not show that the quote supports 
 
 ## 8. Gaps that matter for Phases 1-4
 
-- The human-verified set is small: 30 reviews, all negative, all in the test sample. Each stage has 0-11 cases. Any per-stage or per-batch quality figure on it is very noisy.
-- Spread over simulated daily batches, the 30 reviews give about 4 QA items per batch for 7 batches, or about 2 per batch for 14.
+- The human-verified set is now 100 reviews, all negative, all in the test sample. Each stage has 1-26 person-labelled cases (`reports/label_recheck_agreement_100.json`). Per-stage figures for rare stages (SL 1, BA 2, SM 3) are still very noisy.
+- Spread over 7 simulated daily batches, the 100 reviews give about 14 QA items per batch.
 - No wall-clock time, so LLM throughput can only be stated per worker (from mean latency) or as a stated assumption about workers.
 - Retry reasons were not logged. The parse-error and refusal rates can only be given as "0 failures, 2 retries (cause unknown)".
 - Review text is git-ignored on purpose (`../.gitignore`: "privacy / store terms"). New documents should quote review IDs, not review text.
