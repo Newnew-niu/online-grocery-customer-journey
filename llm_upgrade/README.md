@@ -1,5 +1,14 @@
 # LLM and semantic search upgrade (Module 5)
 
+## Operations view
+
+Each tagger (keyword rules, LLM) is managed as an annotation vendor. Start with the [facts inventory](reports/ops_facts_inventory.md).
+- [Vendor scorecard](reports/vendor_scorecard.md): quality, consistency, efficiency, cost and reliability, with weight sensitivity.
+- [Cost reconciliation](reports/cost_reconciliation.csv): expected vs billed cost. Prices are marked VERIFY in `config/pricing.yaml`.
+- Simulated daily SLA monitor: [Lark Base export](reports/lark_export/) and [setup guide](docs/lark_base_setup.md).
+- [Labelling guideline](docs/labelling_guideline.md), [QA and escalation SOP](docs/qa_escalation_sop.md) and [issue log](docs/issue_log.csv).
+- Simulated parts (batches, dates, thresholds, owners) are marked "simulated" or `sim_`. No new API calls were made.
+
 This folder adds an LLM tagger and semantic search on top of the original project. Everything new is here. The original analysis and result tables are not changed; only the wording about who made the labels was corrected in comments and documents.
 
 **Full write-up:** [reports/module5_llm_and_semantic_search.md](reports/module5_llm_and_semantic_search.md)
@@ -36,6 +45,10 @@ cd llm_upgrade/src
 | Build index | `python 08_build_review_index.py` | `data/chroma/` |
 | Search | `python 09_search_reviews.py "login keeps failing" --retailer tesco --k 5` | matching reviews |
 | Evaluate search | `python 09b_evaluate_retrieval.py` | `reports/retrieval_eval.csv` |
+| Blind labels for the other 70 | `python 00c_make_blind_worksheet_rest.py`, then `python 00d_recheck_agreement_100.py` | agreement on all 100 |
+| Vendor scorecard | `python 10_vendor_scorecard.py` | `reports/vendor_scorecard.md`, csv files, chart |
+| Cost reconciliation | `python 11_cost_reconciliation.py` | `reports/cost_reconciliation.csv` |
+| Simulated daily SLA | `python 12_simulated_daily_sla.py` | `reports/lark_export/` |
 | Tests | `pytest llm_upgrade/tests -q` (from the repo root) | no API key needed |
 
 Answers are cached by model, prompt version and review ID, so a rerun of the same prompt is free. Script 06 stops if a run is estimated to cost more than $2, and it refuses a second prompt on the test sample unless a reason is given.
