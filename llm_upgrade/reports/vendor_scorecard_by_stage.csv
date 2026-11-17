@@ -1,0 +1,21 @@
+vendor,stage_code,stage,person_labelled,tp,fp,fn,precision,recall,f1
+rules,AL,Account & login,19,15,6,4,0.7142857142857143,0.7894736842105263,0.75
+rules,SB,Search & browse,7,5,2,2,0.7142857142857143,0.7142857142857143,0.7142857142857143
+rules,BA,Basket / add to cart,2,0,0,2,,0.0,0.0
+rules,SL,Delivery slot booking,1,0,2,1,0.0,0.0,0.0
+rules,CP,Checkout & payment,11,6,5,5,0.5454545454545454,0.5454545454545454,0.5454545454545454
+rules,SM,Substitutions & missing items,3,2,1,1,0.6666666666666666,0.6666666666666666,0.6666666666666666
+rules,DC,Delivery / collection,5,2,3,3,0.4,0.4,0.4
+rules,RS,Refunds & customer service,6,3,3,3,0.5,0.5,0.5
+rules,AP,"App performance (crashes, speed)",26,16,13,10,0.5517241379310345,0.6153846153846154,0.5818181818181818
+rules,PL,"Pricing, promotions & loyalty",23,20,11,3,0.6451612903225806,0.8695652173913043,0.7407407407407407
+llm,AL,Account & login,19,17,5,2,0.7727272727272727,0.8947368421052632,0.8292682926829268
+llm,SB,Search & browse,7,7,3,0,0.7,1.0,0.8235294117647058
+llm,BA,Basket / add to cart,2,0,2,2,0.0,0.0,0.0
+llm,SL,Delivery slot booking,1,0,2,1,0.0,0.0,0.0
+llm,CP,Checkout & payment,11,7,6,4,0.5384615384615384,0.6363636363636364,0.5833333333333334
+llm,SM,Substitutions & missing items,3,3,2,0,0.6,1.0,0.75
+llm,DC,Delivery / collection,5,3,1,2,0.75,0.6,0.6666666666666666
+llm,RS,Refunds & customer service,6,4,8,2,0.3333333333333333,0.6666666666666666,0.4444444444444444
+llm,AP,"App performance (crashes, speed)",26,20,8,6,0.7142857142857143,0.7692307692307693,0.7407407407407407
+llm,PL,"Pricing, promotions & loyalty",23,19,8,4,0.7037037037037037,0.8260869565217391,0.76

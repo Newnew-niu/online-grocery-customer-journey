@@ -1,0 +1,14 @@
+# Weights for the vendor scorecard (script src/10_vendor_scorecard.py).
+# Weights are relative: they are divided by their sum. Agreed with the owner on 2026-11-17.
+weights:
+  quality: 40       # micro F1 against the person's blind labels (100 test reviews)
+  consistency: 15   # Cohen's kappa against the person's blind labels
+  efficiency: 15    # reviews per minute, relative to the fastest vendor
+  cost: 15          # API cost per 1,000 reviews, relative to the cheapest vendor
+  reliability: 15   # 100 x product of (1 - rate) over failure, retry, inexact-quote and repeat-run change rates
+
+# Weight-sensitivity check: random weight sets drawn uniformly from all possible
+# weight mixes (Dirichlet with all parameters 1).
+sensitivity:
+  random_draws: 10000
+  seed: 2026

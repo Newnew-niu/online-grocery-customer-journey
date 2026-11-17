@@ -1,0 +1,11 @@
+scenario,w_quality,w_consistency,w_efficiency,w_cost,w_reliability,overall_rules,overall_llm,winner
+agreed weights,40.0,15.0,15.0,15.0,15.0,79.14540229152414,51.245619298407476,rules
+equal weights,1.0,1.0,1.0,1.0,1.0,84.42628562417285,44.93567953237956,rules
+quality only,1.0,0.0,0.0,0.0,0.0,63.30275229357798,70.17543859649122,llm
+quality + consistency only,1.0,1.0,0.0,0.0,0.0,61.06571406043214,68.27684167154601,llm
+without quality,0.0,15.0,15.0,15.0,15.0,89.70716895682158,38.62573976635164,rules
+without consistency,40.0,0.0,15.0,15.0,15.0,82.73070696168377,48.57515598402042,rules
+without efficiency,40.0,15.0,0.0,15.0,15.0,75.46517916649898,60.25210189713708,rules
+without cost,40.0,15.0,15.0,0.0,15.0,75.46517916649898,60.28896388047938,rules
+without reliability,40.0,15.0,15.0,15.0,0.0,75.46517916649898,44.77440568991477,rules
+"random weights (10,000 draws)",,,,,,,,rules 99.4%; llm 0.6%; tie 0.0%
