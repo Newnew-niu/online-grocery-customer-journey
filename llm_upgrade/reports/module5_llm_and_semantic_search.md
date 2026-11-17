@@ -1,5 +1,7 @@
 # Module 5 - LLM tagging and semantic search
 
+> **Note (added 17 Nov 2026):** the precision comparison in this report is unpaired. The AI-made labels cover 100 test reviews, but the person's blind labels cover only 30 of them, so the two rows are scored on different reviews. For a paired comparison on the same reviews (all 100, the first 30 and the other 70), see [`label_source_effect.csv`](label_source_effect.csv).
+
 **Question:** can an LLM tag reviews better than the keyword rules, and can semantic search find reviews better than keyword search?
 
 **Short answer:** it depends on the labels used to judge it, and that is the main finding. Against the original AI-made labels the LLM looks better than the rules. Against a person's blind labels on 30 reviews it looks slightly worse. All these differences are within sampling noise. The LLM is a cheap and repeatable-enough tagger, but this work does not prove that it beats the rules.
