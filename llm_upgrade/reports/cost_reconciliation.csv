@@ -1,0 +1,9 @@
+run_file,sample,prompt,model,date,reviews,input_tokens,output_tokens,logged_cost_usd,note,input_price_per_million_usd,output_price_per_million_usd,prices_verified,expected_usd,actual_usd,variance_usd,variance_pct,threshold_pct,status
+reports/llm_run_all_journey_stage_v2.json,all,journey_stage_v2,claude-haiku-5-5,2026-11-04,2091,3088673,183584,0.40065930000000005,minus the cached dev and test answers it reused,0.1,0.5,False,0.4006593,,,,,per-run actual NOT AVAILABLE (console does not split by run)
+reports/llm_run_dev_journey_stage_v1.json,dev,journey_stage_v1,claude-haiku-5-5,2026-11-04,100,133359,17243,0.021957400000000002,,0.1,0.5,False,0.021957400000000002,,,,,per-run actual NOT AVAILABLE (console does not split by run)
+reports/llm_run_dev_journey_stage_v2.json,dev,journey_stage_v2,claude-haiku-5-5,2026-11-04,100,164959,19754,0.0263729,,0.1,0.5,False,0.0263729,,,,,per-run actual NOT AVAILABLE (console does not split by run)
+reports/llm_run_dev_journey_stage_v2__rerun.json,dev,journey_stage_v2__rerun,claude-haiku-5-5,2026-11-04,100,164959,20577,0.0267844,,0.1,0.5,False,0.0267844,,,,,per-run actual NOT AVAILABLE (console does not split by run)
+reports/llm_run_dev_journey_stage_v3.json,dev,journey_stage_v3,claude-haiku-5-5,2026-11-04,100,173259,21053,0.027852400000000003,,0.1,0.5,False,0.027852400000000003,,,,,per-run actual NOT AVAILABLE (console does not split by run)
+reports/llm_run_dev_journey_stage_v3__rerun.json,dev,journey_stage_v3__rerun,claude-haiku-5-5,2026-11-04,100,173259,20501,0.0275764,,0.1,0.5,False,0.0275764,,,,,per-run actual NOT AVAILABLE (console does not split by run)
+reports/llm_run_test_journey_stage_v2.json,test,journey_stage_v2,claude-haiku-5-5,2026-11-04,100,164808,21560,0.027260799999999998,,0.1,0.5,False,0.027260799999999998,,,,,per-run actual NOT AVAILABLE (console does not split by run)
+TOTAL,,,,2026-11-04,,4063276,304272,0.5584636,,,,False,0.5584636,,,,5,NOT ENTERED

@@ -1,0 +1,25 @@
+# Prices and the actual bill for the cost reconciliation (script src/11_cost_reconciliation.py).
+#
+# VERIFY: these prices are copied from src/llm_client.py (PRICES, from a price table cached
+# on 2026-10-06). They have NOT been checked. Before you trust the result:
+#   1. Open Anthropic's pricing page and check the input and output price for the model.
+#      Check whether any special rate applied to these calls (for example a tier for very
+#      long prompts, batch or cache pricing). The runs here used plain, uncached requests.
+#   2. Correct the numbers below if needed, then set verified: true and verified_on.
+models:
+  claude-haiku-5-5:
+    input_per_million_usd: 0.10    # VERIFY
+    output_per_million_usd: 0.50   # VERIFY
+    verified: false
+    verified_on: null              # e.g. 2026-11-18
+
+# Enter by hand from the Anthropic console (cost or usage page). Use the API key and the
+# day(s) of the runs: all LLM runs were on 2026-11-04 (see reports/llm_run_*.json).
+# Leave as null until you have the figure; the script then reports "NOT ENTERED".
+actual:
+  cost_usd: null
+  period: "2026-11-04"
+  source: ""                       # e.g. "Console > Cost, API key llm-upgrade, 4 Nov 2026"
+
+# Flag the total if |actual - expected| / expected is above this percentage.
+variance_threshold_pct: 5
