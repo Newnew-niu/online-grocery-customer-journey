@@ -1,0 +1,15 @@
+sim_batch_id,sim_batch_date,vendor,sim_owner_role,output_volume,reviews_with_stage,labels_produced,failure_rate,retry_rate,quotes_checked,quote_fail_rate,input_tokens,output_tokens,cost_usd,cost_per_1000_usd,disagreement_rate,person_labelled_in_batch,qa_sample_size,qa_precision,qa_recall,qa_f1,breach,breach_reason,sim_status
+SIM-B01,2026-11-09,rules,Rules tagger owner,299,152,218,0.0,0.0,,,0,0,0.0,0.0,0.3378,16,10,0.5,0.5556,0.5263,TRUE,QA F1 below 0.6 (0.526),Open
+SIM-B01,2026-11-09,llm,LLM tagger owner,299,128,188,0.0,0.0,188,0.0,488858,34595,0.0662,0.2213,0.3378,16,10,0.4167,0.5556,0.4762,TRUE,QA F1 below 0.6 (0.476),Open
+SIM-B02,2026-11-10,rules,Rules tagger owner,299,151,196,0.0,0.0,,,0,0,0.0,0.0,0.3445,14,10,0.6667,0.8889,0.7619,FALSE,,No action
+SIM-B02,2026-11-10,llm,LLM tagger owner,299,118,155,0.0,0.0,155,0.0,488168,34203,0.0659,0.2205,0.3445,14,10,0.7273,0.8889,0.8,FALSE,,No action
+SIM-B03,2026-11-11,rules,Rules tagger owner,299,151,206,0.0,0.0,,,0,0,0.0,0.0,0.3177,9,9,0.6364,0.7778,0.7,FALSE,,No action
+SIM-B03,2026-11-11,llm,LLM tagger owner,299,114,163,0.0,0.0033,163,0.0,489563,32487,0.0652,0.2181,0.3177,9,9,0.5833,0.7778,0.6667,FALSE,,No action
+SIM-B04,2026-11-12,rules,Rules tagger owner,299,156,206,0.0,0.0,,,0,0,0.0,0.0,0.388,15,10,0.5556,0.5,0.5263,TRUE,QA F1 below 0.6 (0.526),Open
+SIM-B04,2026-11-12,llm,LLM tagger owner,299,117,157,0.0,0.0033,157,0.0,491397,29416,0.0638,0.2135,0.388,15,10,0.6923,0.9,0.7826,FALSE,,No action
+SIM-B05,2026-11-13,rules,Rules tagger owner,299,137,192,0.0,0.0,,,0,0,0.0,0.0,0.3043,16,10,0.7273,0.7273,0.7273,FALSE,,No action
+SIM-B05,2026-11-13,llm,LLM tagger owner,299,106,155,0.0,0.0,155,0.0,487674,31264,0.0644,0.2154,0.3043,16,10,0.75,0.8182,0.7826,FALSE,,No action
+SIM-B06,2026-11-14,rules,Rules tagger owner,298,149,212,0.0,0.0,,,0,0,0.0,0.0,0.349,9,9,0.6364,0.875,0.7368,FALSE,,No action
+SIM-B06,2026-11-14,llm,LLM tagger owner,298,113,156,0.0,0.0,156,0.0,486278,30105,0.0637,0.2137,0.349,9,9,0.7273,1.0,0.8421,FALSE,,No action
+SIM-B07,2026-11-15,rules,Rules tagger owner,298,143,211,0.0,0.0,,,0,0,0.0,0.0,0.3523,21,10,0.75,0.75,0.75,FALSE,,No action
+SIM-B07,2026-11-15,llm,LLM tagger owner,298,115,164,0.0,0.0,164,0.0,486502,32828,0.0651,0.2183,0.3523,21,10,0.6,0.75,0.6667,FALSE,,No action

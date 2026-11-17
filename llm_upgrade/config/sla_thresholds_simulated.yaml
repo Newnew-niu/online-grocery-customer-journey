@@ -1,0 +1,26 @@
+# SIMULATED SLA thresholds for script src/12_simulated_daily_sla.py.
+# These are example targets for a practice ops setup. They are not real contract terms.
+# They were written on 2026-11-17 before any per-batch result was computed, and were not
+# tuned to the results.
+
+simulation:
+  batches: 7                    # agreed with the owner
+  seed: 20261117                # makes the batch split and the QA samples repeatable
+  first_batch_date: "2026-11-09"  # simulated dates: one batch per day
+  qa_sample_per_batch: 10       # QA spot check: up to this many person-labelled reviews per batch
+
+# A batch breaches its SLA if any of these is not met.
+thresholds:
+  min_output_volume: 250            # reviews tagged per batch
+  max_failure_rate: 0.005           # reviews with no answer after all retries
+  max_retry_rate: 0.01              # reviews that needed more than one attempt (cause not logged)
+  max_quote_fail_rate: 0.01         # LLM only: evidence quotes that are not exact substrings
+  max_disagreement_rate: 0.40       # reviews where rules and LLM give a different label set
+  max_cost_per_1000_usd: 0.30       # API cost per 1,000 reviews (prices: VERIFY in config/pricing.yaml)
+  min_qa_sample: 8                  # fewer QA items than this is itself a breach (quality unknown)
+  min_qa_f1: 0.60                   # micro F1 on the QA sample, against the person's labels
+
+# Who gets the alert in Lark (roles only; the owner adds real people in Lark).
+owners:
+  rules: "Rules tagger owner"
+  llm: "LLM tagger owner"

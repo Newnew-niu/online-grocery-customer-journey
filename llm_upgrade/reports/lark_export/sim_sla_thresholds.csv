@@ -1,0 +1,9 @@
+sim_threshold,value,applies_to,meaning
+min_output_volume,250,both,reviews tagged per batch
+max_failure_rate,0.005,both,share of reviews with no answer after all retries
+max_retry_rate,0.01,both,share of reviews needing more than one attempt; cause not logged
+max_quote_fail_rate,0.01,llm,share of evidence quotes that are not exact substrings
+max_disagreement_rate,0.4,both,share of reviews where rules and LLM give a different label set
+max_cost_per_1000_usd,0.3,both,"API cost per 1,000 reviews; prices VERIFY"
+min_qa_sample,8,both,QA items checked per batch
+min_qa_f1,0.6,both,micro F1 on the QA sample vs the person's labels
