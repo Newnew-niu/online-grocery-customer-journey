@@ -3,9 +3,20 @@
 weights:
   quality: 40       # micro F1 against the person's blind labels (100 test reviews)
   consistency: 15   # Cohen's kappa against the person's blind labels
-  efficiency: 15    # reviews per minute, relative to the fastest vendor
-  cost: 15          # API cost per 1,000 reviews, relative to the cheapest vendor
+  efficiency: 15    # reviews per minute, scored against the SLA target below
+  cost: 15          # API cost per 1,000 reviews, scored against the SLA target below
   reliability: 15   # 100 x product of (1 - rate) over failure, retry, inexact-quote and repeat-run change rates
+
+# SIMULATED SLA targets for efficiency and cost. Not real contract terms.
+# Main method ("target"): 100 when the target is met; when missed, the score scales down
+#   cost:       100 x target / actual
+#   throughput: 100 x actual / target
+# The old method ("relative": scored against the best vendor) is still reported next to it.
+# Set on 2026-11-17, after both vendors' cost and speed were known. They come from the needs of
+# the simulated daily monitor, not from the vendors' own figures.
+sla_targets_simulated:
+  max_cost_per_1000_usd: 0.30    # the same cost limit as config/sla_thresholds_simulated.yaml
+  min_reviews_per_minute: 10     # a simulated daily batch of ~300 reviews tagged within 30 minutes
 
 # Weight-sensitivity check: random weight sets drawn uniformly from all possible
 # weight mixes (Dirichlet with all parameters 1).

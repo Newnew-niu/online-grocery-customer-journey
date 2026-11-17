@@ -12,10 +12,13 @@ locally. No API calls are made.
 Dimension scores (0-100):
 - quality      = 100 x micro F1 against the person's labels
 - consistency  = 100 x Cohen's kappa against the person's labels (floored at 0)
-- efficiency   = 100 x reviews per minute / fastest vendor's reviews per minute
-- cost         = 100 x cheapest cost / this vendor's cost (100 for the cheapest; 0 if the cheapest is free)
+- efficiency and cost, two methods (both are reported):
+    "target" (main): against SIMULATED SLA targets in config/scorecard_weights.yaml.
+        100 when the target is met; otherwise 100 x actual / target (speed) or 100 x target / actual (cost).
+    "relative" (old): against the best vendor. 100 x speed / fastest speed; 100 x cheapest cost / cost,
+        which gives any paid vendor 0 next to a free one.
 - reliability  = 100 x product of (1 - rate) over the rates that apply to the vendor
-Overall = weighted mean of the five, with weights from config/scorecard_weights.yaml.
+Overall = weighted mean of the five, with weights from config/scorecard_weights.yaml, for each method.
 
 Inputs (git-ignored ones are marked *):
   reports/test_recheck_labels_100.csv, reports/llm_run_all_journey_stage_v2.json,
@@ -46,6 +49,7 @@ from journey_rules import STAGE_LABELS, tag_text  # noqa: E402
 CONFIG = UPGRADE / "config" / "scorecard_weights.yaml"
 DIMENSIONS = ["quality", "consistency", "efficiency", "cost", "reliability"]
 VENDORS = ["rules", "llm"]
+METHODS = ["target", "relative"]  # main method first
 VENDOR_NAMES = {"rules": "Keyword rules", "llm": "LLM (Haiku, prompt v2)"}
 N_BOOT = 10000
 SEED = 2026
@@ -80,10 +84,35 @@ def reliability_score(rates):
     return 100 * out
 
 
-def dimension_scores(raw):
-    """raw: {vendor: {micro_f1, kappa_vs_person, reviews_per_minute, cost_per_1000_usd, rates}}"""
-    eff = relative_higher_better({v: r["reviews_per_minute"] for v, r in raw.items()})
-    cost = relative_lower_better({v: r["cost_per_1000_usd"] for v, r in raw.items()})
+def target_higher_better(value, target):
+    """100 when the target is met; otherwise scaled down in proportion."""
+    return 100.0 if value >= target else 100 * value / target
+
+
+def target_lower_better(value, target):
+    """100 when the value is at or below the target; otherwise 100 x target / value."""
+    return 100.0 if value <= target else 100 * target / value
+
+
+def meets_targets(raw, targets):
+    return {v: {"speed": r["reviews_per_minute"] >= targets["min_reviews_per_minute"],
+                "cost": r["cost_per_1000_usd"] <= targets["max_cost_per_1000_usd"]} for v, r in raw.items()}
+
+
+def dimension_scores(raw, method="target", targets=None):
+    """raw: {vendor: {micro_f1, kappa_vs_person, reviews_per_minute, cost_per_1000_usd, rates}}
+    method "target": efficiency and cost against fixed SLA targets (main method).
+    method "relative": efficiency and cost against the best vendor (old method)."""
+    if method == "target":
+        eff = {v: target_higher_better(r["reviews_per_minute"], targets["min_reviews_per_minute"])
+               for v, r in raw.items()}
+        cost = {v: target_lower_better(r["cost_per_1000_usd"], targets["max_cost_per_1000_usd"])
+                for v, r in raw.items()}
+    elif method == "relative":
+        eff = relative_higher_better({v: r["reviews_per_minute"] for v, r in raw.items()})
+        cost = relative_lower_better({v: r["cost_per_1000_usd"] for v, r in raw.items()})
+    else:
+        raise ValueError(f"unknown method {method}")
     return {v: {"quality": 100 * r["micro_f1"],
                 "consistency": 100 * max(0.0, r["kappa_vs_person"]),
                 "efficiency": eff[v], "cost": cost[v],
@@ -120,6 +149,20 @@ def sensitivity(scores, weights, draws, seed):
     return pd.DataFrame(rows), {k: n / draws for k, n in wins.items()}
 
 
+def sensitivity_both(scores, weights, draws, seed):
+    """Run the sensitivity check for each scoring method and put the results side by side."""
+    tables, shares = [], {}
+    for method, sc in scores.items():
+        t, shares[method] = sensitivity(sc, weights, draws, seed)
+        keep = ["scenario"] + ([c for c in t.columns if c.startswith("w_")] if not tables else [])
+        t = t.rename(columns={c: f"{c}_{method}" for c in t.columns if c.startswith(("overall_", "winner"))})
+        tables.append(t[keep + [c for c in t.columns if c.endswith(f"_{method}")]])
+    out = tables[0]
+    for t in tables[1:]:
+        out = out.merge(t, on="scenario", how="left", validate="one_to_one")
+    return out, shares
+
+
 def md_table(df):
     """A plain markdown table, so no extra package is needed."""
     cols = [str(c) for c in df.columns]
@@ -128,45 +171,54 @@ def md_table(df):
     return "\n".join(lines)
 
 
-def recommendation(totals, diffs, llm_cost_per_1000, llm_change_rate, random_share):
-    """Return (vendor, paragraph) from the numbers. diffs: one row per label round
-    with f1_rules, f1_llm, ci_low, ci_high, ci_excludes_zero (round 'all100' is the main one)."""
+def recommendation(totals, diffs, llm_cost_per_1000, llm_change_rate, random_share, meets):
+    """Return (vendor, paragraph) from the numbers.
+    totals, random_share: {method: {...}} for methods "target" (main) and "relative" (old).
+    diffs: one row per label round with f1_rules, f1_llm, ci_low, ci_high, ci_excludes_zero.
+    meets: {vendor: {"speed": bool, "cost": bool}} against the simulated SLA targets."""
     d = diffs.set_index("label_round")
     a = d.loc["all100"]
-    weighted = winner(totals)
+    main = winner(totals["target"])
+    main = main if main != "tie" else ("llm" if a["f1_llm"] > a["f1_rules"] else "rules")
     quality = "llm" if a["f1_llm"] > a["f1_rules"] else "rules"
     other = {"rules": "llm", "llm": "rules"}
     name = {"rules": "the keyword rules", "llm": "the LLM tagger"}
-    f1 = (f"On the person's labels for {int(a['reviews'])} reviews, micro F1 is {a['f1_rules']:.2f} for the rules "
-          f"and {a['f1_llm']:.2f} for the LLM (difference {a['f1_llm'] - a['f1_rules']:+.2f}, "
-          f"95% CI {a['ci_low']:+.2f} to {a['ci_high']:+.2f}).")
-    scores = (f"With the agreed weights the rules score {totals['rules']:.1f} and the LLM {totals['llm']:.1f}.")
-    if weighted == quality or not a["ci_excludes_zero"]:
-        noise = (" The quality gap is within noise, because the CI includes zero."
-                 if not a["ci_excludes_zero"] else "")
-        text = (f"**Recommendation: use {name[weighted]} as the main vendor.** {scores} {f1}{noise} "
-                f"The LLM costs ${llm_cost_per_1000:.2f} per 1,000 reviews and changed its labels on "
-                f"{llm_change_rate:.0%} of dev reviews when run again; the rules are free and give the same "
-                f"labels every time. Keep {name[other[weighted]]} as a second opinion on reviews where the two disagree.")
-        return weighted, text
+    t, rel = totals["target"], totals["relative"]
+
+    rounds_split = False
     split = ""
     if {"first30", "rest70"} <= set(d.index):
         f30, r70 = d.loc["first30"], d.loc["rest70"]
-        same_sign = (f30["f1_llm"] - f30["f1_rules"]) * (r70["f1_llm"] - r70["f1_rules"]) > 0
-        if not same_sign:
+        rounds_split = (f30["f1_llm"] - f30["f1_rules"]) * (r70["f1_llm"] - r70["f1_rules"]) <= 0
+        if rounds_split:
             split = (f" But the gap is not stable across the two labelling rounds. On the 30 reviews labelled before "
                      f"the LLM test run, the rules were ahead ({f30['f1_rules']:.2f} vs {f30['f1_llm']:.2f}). On the 70 "
                      f"labelled after its results were published, the LLM was ahead ({r70['f1_llm']:.2f} vs "
-                     f"{r70['f1_rules']:.2f}). So the quality lead is real on this data but not yet settled.")
-    text = (f"**Recommendation: use {name[quality]} as the main vendor, with {name[other[quality]]} as a "
-            f"cross-check.** {scores} That lead comes from cost and speed, which are scored relative to the best "
-            f"vendor: a free, local vendor gets full marks and any paid vendor almost none, even though the LLM "
-            f"costs only ${llm_cost_per_1000:.2f} per 1,000 reviews. With random weights the rules still lead in "
-            f"{random_share['rules']:.0%} of draws for the same reason. Quality is the main job of an annotation "
-            f"vendor, and there the LLM is better. {f1}{split} The LLM also changed its labels on "
+                     f"{r70['f1_rules']:.2f}).")
+    settled = a["ci_excludes_zero"] and not rounds_split and main == quality
+
+    met = [v for v in meets if meets[v]["speed"] and meets[v]["cost"]]
+    met_text = ("Both vendors meet the simulated cost and speed targets" if len(met) == 2 else
+                f"Only {name[met[0]]} meets both simulated cost and speed targets" if met else
+                "Neither vendor meets both simulated cost and speed targets")
+    scores = (f"{met_text}, so on the SLA-target method the rules score {t['rules']:.1f} and the LLM "
+              f"{t['llm']:.1f}. With the old relative method the rules score {rel['rules']:.1f} and the LLM "
+              f"{rel['llm']:.1f}, because a free vendor gets full marks on cost and speed and any paid vendor almost "
+              f"none, even though the LLM costs only ${llm_cost_per_1000:.2f} per 1,000 reviews.")
+    f1 = (f"On the person's labels for {int(a['reviews'])} reviews, micro F1 is {a['f1_rules']:.2f} for the rules "
+          f"and {a['f1_llm']:.2f} for the LLM (difference {a['f1_llm'] - a['f1_rules']:+.2f}, "
+          f"95% CI {a['ci_low']:+.2f} to {a['ci_high']:+.2f}).")
+    noise = "" if a["ci_excludes_zero"] else " The quality gap is within noise, because the CI includes zero."
+    conflict = ("" if main == quality else
+                f" {name[main].capitalize()} leads on the weighted score, but {name[quality]} leads on quality.")
+    draws = (f"With random weights, {name[main]} leads in {random_share['target'][main]:.0%} of draws on the "
+             f"SLA-target method, so the choice depends on the weights.")
+    text = (f"**Recommendation: use {name[main]} as the main vendor, with {name[other[main]]} as a cross-check. "
+            f"{'The result is settled on this data.' if settled else 'This choice is unsettled.'}** "
+            f"{scores} {f1}{noise}{split}{conflict} {draws} The LLM also changed its labels on "
             f"{llm_change_rate:.0%} of dev reviews when run again, so a repeat check and QA sampling are needed. "
             f"Next step: label a fresh blind sample before looking at any tagger output, and rescore.")
-    return quality, text
+    return main, text
 
 
 def winner(s):
@@ -226,20 +278,22 @@ def chart(scores, overall_by_vendor, weights):
     import chart_style as cs  # original src/, put on the path by common
 
     cs.apply()
-    rows = DIMENSIONS[::-1] + ["overall"]
-    labels = {d: f"{d.capitalize()} ({weights[d]})" for d in DIMENSIONS} | {"overall": "Weighted overall"}
-    fig, ax = plt.subplots(figsize=(8.5, 4.6))
+    rows = DIMENSIONS[::-1] + ["overall_relative", "overall_target"]
+    labels = {d: f"{d.capitalize()} ({weights[d]})" for d in DIMENSIONS} | {
+        "overall_target": "Overall, SLA targets", "overall_relative": "Overall, relative (old)"}
+    fig, ax = plt.subplots(figsize=(8.5, 5.0))
     h = 0.36
     for k, v in enumerate(VENDORS):
-        vals = [scores[v][d] for d in DIMENSIONS[::-1]] + [overall_by_vendor[v]]
+        vals = ([scores["target"][v][d] for d in DIMENSIONS[::-1]]
+                + [overall_by_vendor["relative"][v], overall_by_vendor["target"][v]])
         y = np.arange(len(rows)) + (0.5 - k) * (h + 0.04)  # rules on top, as in the legend
         ax.barh(y, vals, height=h, color=cs.SERIES[k], label=VENDOR_NAMES[v])
         for yy, val in zip(y, vals):
             ax.text(val + 1, yy, f"{val:.0f}", va="center", fontsize=8, color=cs.TEXT_2)
     ax.set_yticks(range(len(rows)), [labels[r] for r in rows])
-    ax.axhline(len(rows) - 1.5, color=cs.GRID, lw=1)
+    ax.axhline(len(rows) - 2.5, color=cs.GRID, lw=1)
     ax.set_xlim(0, 112)
-    ax.set_xlabel("Score (0-100), weight in brackets")
+    ax.set_xlabel("Score (0-100), weight in brackets. Cost and efficiency scored against simulated SLA targets")
     ax.grid(axis="y", visible=False)
     ax.legend(loc="lower left", bbox_to_anchor=(0, 1.0), ncol=2, frameon=False, fontsize=8)
     cs.title(fig, "Vendor scorecard: keyword rules vs LLM tagger")
@@ -292,10 +346,12 @@ def main():
                        "macro_f1": ma["f1"], "f1_ci95": f1_ci[v]["f1"],
                        "kappa_vs_person": cohen_kappa(truth, preds[v]), "kappa_ci95": k_ci[v],
                        **{f"micro_f1_{r}": micro(truth[m], preds[v][m])["f1"] for r, m in rounds.items()}})
-    scores = dimension_scores(raw)
-    totals = {v: overall(scores[v], weights) for v in VENDORS}
-    sens, random_share = sensitivity(scores, weights, cfg["sensitivity"]["random_draws"],
-                                     cfg["sensitivity"]["seed"])
+    targets = cfg["sla_targets_simulated"]
+    scores = {m: dimension_scores(raw, m, targets) for m in METHODS}
+    totals = {m: {v: overall(scores[m][v], weights) for v in VENDORS} for m in METHODS}
+    meets = meets_targets(raw, targets)
+    sens, random_share = sensitivity_both(scores, weights, cfg["sensitivity"]["random_draws"],
+                                          cfg["sensitivity"]["seed"])
 
     between = {"kappa_rules_vs_llm_test100": cohen_kappa(preds["rules"], preds["llm"]),
                "kappa_rules_vs_llm_all": cohen_kappa(all_rules, all_llm),
@@ -329,8 +385,10 @@ def main():
                                  else "60 / mean logged latency, one worker (llm_run_all_journey_stage_v2.json)"),
             "cost_per_1000_usd": r["cost_per_1000_usd"],
             **{k: ("n/a" if val is None else val) for k, val in r["rates"].items()},
-            **{f"score_{d}": scores[v][d] for d in DIMENSIONS},
-            "overall_score": totals[v],
+            "meets_speed_target_simulated": meets[v]["speed"], "meets_cost_target_simulated": meets[v]["cost"],
+            **{f"score_{d}": scores["target"][v][d] for d in ("quality", "consistency", "reliability")},
+            **{f"score_{d}_{m}": scores[m][v][d] for m in METHODS for d in ("efficiency", "cost")},
+            **{f"overall_score_{m}": totals[m][v] for m in METHODS},
         })
     pd.DataFrame(rows).to_csv(REPORTS / "vendor_scorecard.csv", index=False)
 
@@ -343,17 +401,20 @@ def main():
     sens.to_csv(REPORTS / "vendor_scorecard_sensitivity.csv", index=False)
     diffs.to_csv(REPORTS / "vendor_scorecard_f1_diff.csv", index=False)
     chart(scores, totals, weights)
-    write_summary(raw, scores, totals, weights, sens, random_share, between, diffs, k_ci, timing, len(truth), run)
+    write_summary(raw, scores, totals, weights, sens, random_share, between, diffs, k_ci, timing, len(truth), run,
+                  targets, meets)
     print(pd.DataFrame(rows).set_index("vendor")[["micro_f1", "kappa_vs_person", "reviews_per_minute",
-                                                   "cost_per_1000_usd", "overall_score"]].round(3).to_string())
+                                                   "cost_per_1000_usd", "overall_score_target",
+                                                   "overall_score_relative"]].round(3).to_string())
     print("F1 diff llm-rules CI", [round(q, 3) for q in diff_f1], "| random weights:", random_share)
 
 
-def write_summary(raw, scores, totals, weights, sens, random_share, between, diffs, k_ci, timing, n, run):
+def write_summary(raw, scores, totals, weights, sens, random_share, between, diffs, k_ci, timing, n, run,
+                  targets, meets):
     r, l = raw["rules"], raw["llm"]
     f = lambda x: f"{x:.2f}"
     _, rec = recommendation(totals, diffs, l["cost_per_1000_usd"], l["rates"]["repeat_run_change_rate"],
-                            random_share)
+                            random_share, meets)
     diff_t = pd.DataFrame({
         "Labels": diffs["label_round"].map({"all100": "all 100", "first30": "first 30 (before test run)",
                                             "rest70": "other 70 (after results)"}),
@@ -362,15 +423,20 @@ def write_summary(raw, scores, totals, weights, sens, random_share, between, dif
         "LLM - rules (95% CI)": [f"{a:+.2f} ({b:+.2f} to {c:+.2f})" for a, b, c in
                                  zip(diffs["f1_llm_minus_rules"], diffs["ci_low"], diffs["ci_high"])],
     })
-    table = pd.DataFrame({
-        "Dimension (weight)": [f"{d.capitalize()} ({weights[d]})" for d in DIMENSIONS] + ["**Overall**"],
-        VENDOR_NAMES["rules"]: [f"{scores['rules'][d]:.1f}" for d in DIMENSIONS] + [f"**{totals['rules']:.1f}**"],
-        VENDOR_NAMES["llm"]: [f"{scores['llm'][d]:.1f}" for d in DIMENSIONS] + [f"**{totals['llm']:.1f}**"],
-    })
-    sens_t = sens[["scenario", "overall_rules", "overall_llm", "winner"]].copy()
-    for c in ("overall_rules", "overall_llm"):
-        sens_t[c] = sens_t[c].map(lambda x: "" if pd.isna(x) else f"{x:.1f}")
+    col = {("rules", "target"): "Rules, SLA targets", ("llm", "target"): "LLM, SLA targets",
+           ("rules", "relative"): "Rules, relative (old)", ("llm", "relative"): "LLM, relative (old)"}
+    table = pd.DataFrame({"Dimension (weight)": [f"{d.capitalize()} ({weights[d]})" for d in DIMENSIONS]
+                          + ["**Overall**"]})
+    for m in METHODS:
+        for v in VENDORS:
+            table[col[(v, m)]] = ([f"{scores[m][v][d]:.1f}" for d in DIMENSIONS] + [f"**{totals[m][v]:.1f}**"])
+    sens_t = pd.DataFrame({"Scenario": sens["scenario"]})
+    for m in METHODS:
+        for v in VENDORS:
+            sens_t[col[(v, m)]] = sens[f"overall_{v}_{m}"].map(lambda x: "" if pd.isna(x) else f"{x:.1f}")
+        sens_t[f"Winner, {'SLA targets' if m == 'target' else 'relative (old)'}"] = sens[f"winner_{m}"]
     pct = lambda x: f"{x:.1%}"
+    yn = lambda x: "yes" if x else "no"
     text = f"""# Vendor scorecard
 
 Made by `src/10_vendor_scorecard.py`. Weights from `config/scorecard_weights.yaml`. All numbers below are in
@@ -424,12 +490,22 @@ Source: `reports/vendor_scorecard_f1_diff.csv` (10,000 paired bootstrap resample
 
 ## Weight sensitivity
 
+Each row reweights the same dimension scores. "Random weights" draws 10,000 weight sets uniformly from all possible
+mixes. Both scoring methods use the same draws.
+
 {md_table(sens_t)}
 
 ## How to read this
 
-- Efficiency and cost are relative to the best vendor. With two vendors and one of them free and local, these two
-  dimensions give the rules full marks and the LLM almost none. The sensitivity table shows what happens without them.
+- **Main method: SLA targets (simulated).** Cost scores 100 at or below ${targets['max_cost_per_1000_usd']:.2f} per 1,000
+  reviews, and efficiency scores 100 at or above {targets['min_reviews_per_minute']} reviews per minute. Missing a
+  target scales the score down in proportion. These targets are simulated, not contract terms. They were set on
+  2026-11-17, after both vendors' cost and speed were known (`config/scorecard_weights.yaml`).
+  Targets met: rules speed {yn(meets['rules']['speed'])}, cost {yn(meets['rules']['cost'])};
+  LLM speed {yn(meets['llm']['speed'])}, cost {yn(meets['llm']['cost'])}.
+- **Old method: relative.** Efficiency and cost are scored against the best vendor. With one free, local vendor, that
+  gives the rules full marks and the LLM almost none for a ${l['cost_per_1000_usd']:.2f} difference per 1,000 reviews. It is kept as a second
+  column so both results are visible (`docs/issue_log.csv`, ISS-012).
 - LLM speed is per worker. The run used 8 parallel workers, but the wall-clock time was not logged, so real throughput
   is NOT AVAILABLE.
 - The rules timing was measured on {timing['measured_on']} on one laptop. It is kept in `reports/vendor_timing_rules.json` so

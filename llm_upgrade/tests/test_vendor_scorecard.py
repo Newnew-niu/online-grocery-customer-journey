@@ -7,6 +7,8 @@ import pytest
 m = importlib.import_module("10_vendor_scorecard")
 
 WEIGHTS = {"quality": 40, "consistency": 15, "efficiency": 15, "cost": 15, "reliability": 15}
+TARGETS = {"max_cost_per_1000_usd": 0.30, "min_reviews_per_minute": 10}
+MEETS = {"rules": {"speed": True, "cost": True}, "llm": {"speed": True, "cost": True}}
 
 
 def raw(f1_rules=0.6, f1_llm=0.7):
@@ -46,8 +48,35 @@ def test_reliability_skips_not_applicable_rates():
     assert m.reliability_score({"x": 0.1, "y": 0.5}) == pytest.approx(45.0)
 
 
+def test_target_scores_full_marks_when_met_and_scale_when_missed():
+    assert m.target_higher_better(44, 10) == 100.0
+    assert m.target_higher_better(5, 10) == pytest.approx(50.0)
+    assert m.target_lower_better(0.22, 0.30) == 100.0
+    assert m.target_lower_better(0.0, 0.30) == 100.0
+    assert m.target_lower_better(0.60, 0.30) == pytest.approx(50.0)
+
+
+def test_target_method_does_not_punish_small_cost_differences():
+    s = m.dimension_scores(raw(), "target", TARGETS)
+    assert s["llm"]["cost"] == 100.0 and s["rules"]["cost"] == 100.0
+    assert s["llm"]["efficiency"] == 100.0
+    rel = m.dimension_scores(raw(), "relative")
+    assert rel["llm"]["cost"] == 0.0  # the old method gives a paid vendor 0 next to a free one
+
+
+def test_meets_targets():
+    out = m.meets_targets(raw(), {"max_cost_per_1000_usd": 0.1, "min_reviews_per_minute": 100})
+    assert out["rules"] == {"speed": True, "cost": True}
+    assert out["llm"] == {"speed": False, "cost": False}
+
+
+def test_unknown_method_stops():
+    with pytest.raises(ValueError):
+        m.dimension_scores(raw(), "other", TARGETS)
+
+
 def test_dimension_scores_and_kappa_floor():
-    s = m.dimension_scores(raw())
+    s = m.dimension_scores(raw(), "relative")
     assert s["rules"]["quality"] == pytest.approx(60)
     assert s["llm"]["consistency"] == 0.0  # negative kappa is floored at 0
     assert s["llm"]["efficiency"] == pytest.approx(5.0)
@@ -60,8 +89,16 @@ def test_overall_normalises_weights():
     assert m.overall(scores, {d: w * 3 for d, w in WEIGHTS.items()}) == pytest.approx(50.0)
 
 
+def test_sensitivity_both_methods_side_by_side():
+    scores = {mth: m.dimension_scores(raw(), mth, TARGETS) for mth in ("target", "relative")}
+    table, shares = m.sensitivity_both(scores, WEIGHTS, draws=200, seed=1)
+    assert {"winner_target", "winner_relative", "overall_llm_target", "overall_llm_relative"} <= set(table.columns)
+    assert sum(shares["target"].values()) == pytest.approx(1.0)
+    assert len(table) == 10
+
+
 def test_sensitivity_rows_and_random_shares():
-    s = m.dimension_scores(raw())
+    s = m.dimension_scores(raw(), "relative")
     table, share = m.sensitivity(s, WEIGHTS, draws=200, seed=1)
     assert sum(share.values()) == pytest.approx(1.0)
     q = table.set_index("scenario").loc["quality only"]
@@ -69,26 +106,34 @@ def test_sensitivity_rows_and_random_shares():
     assert "without cost" in set(table["scenario"])
 
 
-def test_recommendation_follows_weighted_score_when_gap_is_noise():
-    totals = {"rules": 80, "llm": 50}
-    d = diffs(all_diff=(0.65, 0.70, -0.02, 0.12))
-    vendor, text = m.recommendation(totals, d, 0.22, 0.12, {"rules": 0.99})
+def rec(totals_target, d, totals_relative=None):
+    totals = {"target": totals_target, "relative": totals_relative or {"rules": 80, "llm": 50}}
+    shares = {"target": {"rules": 0.4, "llm": 0.6}, "relative": {"rules": 0.99, "llm": 0.01}}
+    return m.recommendation(totals, d, 0.22, 0.12, shares, MEETS)
+
+
+def test_recommendation_noise_and_both_methods_reported():
+    vendor, text = rec({"rules": 80, "llm": 78}, diffs(all_diff=(0.65, 0.70, -0.02, 0.12)))
     assert vendor == "rules"
-    assert "within noise" in text
+    assert "within noise" in text and "unsettled" in text
+    assert "old relative method" in text and "Both vendors meet" in text
 
 
-def test_recommendation_flags_conflict_and_unstable_rounds():
-    totals = {"rules": 80, "llm": 50}
-    vendor, text = m.recommendation(totals, diffs(), 0.22, 0.12, {"rules": 0.99})
+def test_recommendation_unsettled_when_rounds_disagree():
+    vendor, text = rec({"rules": 79, "llm": 81}, diffs())
     assert vendor == "llm"
     assert "not stable across the two labelling rounds" in text
-    assert "within noise" not in text
+    assert "unsettled" in text and "within noise" not in text
 
 
-def test_recommendation_no_round_warning_when_rounds_agree():
-    totals = {"rules": 80, "llm": 50}
-    _, text = m.recommendation(totals, diffs(first=(0.6, 0.7)), 0.22, 0.12, {"rules": 0.99})
-    assert "not stable" not in text
+def test_recommendation_settled_only_when_everything_agrees():
+    vendor, text = rec({"rules": 79, "llm": 81}, diffs(first=(0.6, 0.7)))
+    assert vendor == "llm" and "settled on this data" in text and "unsettled" not in text
+
+
+def test_recommendation_flags_weighted_vs_quality_conflict():
+    _, text = rec({"rules": 85, "llm": 81}, diffs(first=(0.6, 0.7)))
+    assert "leads on the weighted score" in text and "unsettled" in text
 
 
 def test_md_table():

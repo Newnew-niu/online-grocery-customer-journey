@@ -13,7 +13,7 @@ other 70 after its results were published.
 
 ## Recommendation
 
-**Recommendation: use the LLM tagger as the main vendor, with the keyword rules as a cross-check.** With the agreed weights the rules score 79.1 and the LLM 51.2. That lead comes from cost and speed, which are scored relative to the best vendor: a free, local vendor gets full marks and any paid vendor almost none, even though the LLM costs only $0.22 per 1,000 reviews. With random weights the rules still lead in 99% of draws for the same reason. Quality is the main job of an annotation vendor, and there the LLM is better. On the person's labels for 100 reviews, micro F1 is 0.63 for the rules and 0.70 for the LLM (difference +0.07, 95% CI +0.01 to +0.13). But the gap is not stable across the two labelling rounds. On the 30 reviews labelled before the LLM test run, the rules were ahead (0.71 vs 0.65). On the 70 labelled after its results were published, the LLM was ahead (0.72 vs 0.60). So the quality lead is real on this data but not yet settled. The LLM also changed its labels on 12% of dev reviews when run again, so a repeat check and QA sampling are needed. Next step: label a fresh blind sample before looking at any tagger output, and rescore.
+**Recommendation: use the LLM tagger as the main vendor, with the keyword rules as a cross-check. This choice is unsettled.** Both vendors meet the simulated cost and speed targets, so on the SLA-target method the rules score 79.1 and the LLM 81.2. With the old relative method the rules score 79.1 and the LLM 51.2, because a free vendor gets full marks on cost and speed and any paid vendor almost none, even though the LLM costs only $0.22 per 1,000 reviews. On the person's labels for 100 reviews, micro F1 is 0.63 for the rules and 0.70 for the LLM (difference +0.07, 95% CI +0.01 to +0.13). But the gap is not stable across the two labelling rounds. On the 30 reviews labelled before the LLM test run, the rules were ahead (0.71 vs 0.65). On the 70 labelled after its results were published, the LLM was ahead (0.72 vs 0.60). With random weights, the LLM tagger leads in 61% of draws on the SLA-target method, so the choice depends on the weights. The LLM also changed its labels on 12% of dev reviews when run again, so a repeat check and QA sampling are needed. Next step: label a fresh blind sample before looking at any tagger output, and rescore.
 
 ## Quality gap by labelling round
 
@@ -27,14 +27,14 @@ Source: `reports/vendor_scorecard_f1_diff.csv` (10,000 paired bootstrap resample
 
 ## Scores
 
-| Dimension (weight) | Keyword rules | LLM (Haiku, prompt v2) |
-|---|---|---|
-| Quality (40) | 63.3 | 70.2 |
-| Consistency (15) | 58.8 | 66.4 |
-| Efficiency (15) | 100.0 | 0.2 |
-| Cost (15) | 100.0 | 0.0 |
-| Reliability (15) | 100.0 | 87.9 |
-| **Overall** | **79.1** | **51.2** |
+| Dimension (weight) | Rules, SLA targets | LLM, SLA targets | Rules, relative (old) | LLM, relative (old) |
+|---|---|---|---|---|
+| Quality (40) | 63.3 | 70.2 | 63.3 | 70.2 |
+| Consistency (15) | 58.8 | 66.4 | 58.8 | 66.4 |
+| Efficiency (15) | 100.0 | 100.0 | 100.0 | 0.2 |
+| Cost (15) | 100.0 | 100.0 | 100.0 | 0.0 |
+| Reliability (15) | 100.0 | 87.9 | 100.0 | 87.9 |
+| **Overall** | **79.1** | **81.2** | **79.1** | **51.2** |
 
 ## Raw metrics
 
@@ -62,23 +62,33 @@ Source: `reports/vendor_scorecard_f1_diff.csv` (10,000 paired bootstrap resample
 
 ## Weight sensitivity
 
-| scenario | overall_rules | overall_llm | winner |
-|---|---|---|---|
-| agreed weights | 79.1 | 51.2 | rules |
-| equal weights | 84.4 | 44.9 | rules |
-| quality only | 63.3 | 70.2 | llm |
-| quality + consistency only | 61.1 | 68.3 | llm |
-| without quality | 89.7 | 38.6 | rules |
-| without consistency | 82.7 | 48.6 | rules |
-| without efficiency | 75.5 | 60.3 | rules |
-| without cost | 75.5 | 60.3 | rules |
-| without reliability | 75.5 | 44.8 | rules |
-| random weights (10,000 draws) |  |  | rules 99.4%; llm 0.6%; tie 0.0% |
+Each row reweights the same dimension scores. "Random weights" draws 10,000 weight sets uniformly from all possible
+mixes. Both scoring methods use the same draws.
+
+| Scenario | Rules, SLA targets | LLM, SLA targets | Winner, SLA targets | Rules, relative (old) | LLM, relative (old) | Winner, relative (old) |
+|---|---|---|---|---|---|---|
+| agreed weights | 79.1 | 81.2 | llm | 79.1 | 51.2 | rules |
+| equal weights | 84.4 | 84.9 | llm | 84.4 | 44.9 | rules |
+| quality only | 63.3 | 70.2 | llm | 63.3 | 70.2 | llm |
+| quality + consistency only | 61.1 | 68.3 | llm | 61.1 | 68.3 | llm |
+| without quality | 89.7 | 88.6 | rules | 89.7 | 38.6 | rules |
+| without consistency | 82.7 | 83.8 | llm | 82.7 | 48.6 | rules |
+| without efficiency | 75.5 | 77.9 | llm | 75.5 | 60.3 | rules |
+| without cost | 75.5 | 77.9 | llm | 75.5 | 60.3 | rules |
+| without reliability | 75.5 | 80.0 | llm | 75.5 | 44.8 | rules |
+| random weights (10,000 draws) |  |  | rules 38.9%; llm 61.1%; tie 0.0% |  |  | rules 99.4%; llm 0.6%; tie 0.0% |
 
 ## How to read this
 
-- Efficiency and cost are relative to the best vendor. With two vendors and one of them free and local, these two
-  dimensions give the rules full marks and the LLM almost none. The sensitivity table shows what happens without them.
+- **Main method: SLA targets (simulated).** Cost scores 100 at or below $0.30 per 1,000
+  reviews, and efficiency scores 100 at or above 10 reviews per minute. Missing a
+  target scales the score down in proportion. These targets are simulated, not contract terms. They were set on
+  2026-11-17, after both vendors' cost and speed were known (`config/scorecard_weights.yaml`).
+  Targets met: rules speed yes, cost yes;
+  LLM speed yes, cost yes.
+- **Old method: relative.** Efficiency and cost are scored against the best vendor. With one free, local vendor, that
+  gives the rules full marks and the LLM almost none for a $0.22 difference per 1,000 reviews. It is kept as a second
+  column so both results are visible (`docs/issue_log.csv`, ISS-012).
 - LLM speed is per worker. The run used 8 parallel workers, but the wall-clock time was not logged, so real throughput
   is NOT AVAILABLE.
 - The rules timing was measured on 2026-11-17 on one laptop. It is kept in `reports/vendor_timing_rules.json` so
