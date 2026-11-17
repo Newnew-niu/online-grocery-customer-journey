@@ -89,12 +89,10 @@ def build(runs, cfg):
              "prices_verified": bool(df["prices_verified"].all()),
              "expected_usd": df["expected_usd"].sum(), "actual_usd": actual,
              "variance_usd": variance, "variance_pct": pct, "threshold_pct": threshold, "status": status}
-    df["actual_usd"] = None
-    df["variance_usd"] = None
-    df["variance_pct"] = None
-    df["threshold_pct"] = None
+    for col in ("actual_usd", "variance_usd", "variance_pct", "threshold_pct"):
+        df[col] = ""  # empty: the console bill is not split by run
     df["status"] = "per-run actual NOT AVAILABLE (console does not split by run)"
-    return pd.concat([df, pd.DataFrame([total])], ignore_index=True)
+    return pd.DataFrame(df.to_dict("records") + [total])
 
 
 def main():
